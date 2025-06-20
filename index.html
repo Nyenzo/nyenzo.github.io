@@ -5,131 +5,126 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Nyenzo's Portfolio</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body {
-      transition: background-color 0.3s, color 0.3s;
-    }
-    .dark {
-      background-color: #1a202c;
+      background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
       color: #e2e8f0;
+      font-family: 'Arial', sans-serif;
+      margin: 0;
+      min-height: 100vh;
     }
-    .fade-in {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    .sidebar {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      width: 250px;
+      height: 100vh;
+      position: fixed;
+      padding-top: 2rem;
     }
-    .fade-in.visible {
-      opacity: 1;
-      transform: translateY(0);
+    .sidebar a {
+      display: block;
+      padding: 1rem;
+      color: #e2e8f0;
+      text-decoration: none;
+      transition: background 0.3s;
+    }
+    .sidebar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .content {
+      margin-left: 250px;
+      padding: 2rem;
+    }
+    .tab-content {
+      display: none;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .project-card {
+      background: rgba(10, 20, 40, 0.7); /* Darker blue */
+      backdrop-filter: blur(5px);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      transition: transform 0.3s;
     }
     .project-card:hover {
       transform: translateY(-5px);
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-    }
-    .theme-toggle {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 1000;
     }
   </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans">
-  <button class="theme-toggle bg-gray-200 dark:bg-gray-700 p-2 rounded-full" onclick="toggleTheme()">
-    <i class="fas fa-moon dark:hidden"></i>
-    <i class="fas fa-sun hidden dark:block"></i>
-  </button>
+<body>
+  <div class="flex">
+    <div class="sidebar">
+      <h2 class="text-2xl font-bold text-center mb-4">Nyenzo</h2>
+      <a href="#" onclick="openTab('software')">Software Projects</a>
+      <a href="#" onclick="openTab('web')">Web Projects</a>
+      <a href="#" onclick="openTab('ai')">AI & ML Demos</a>
+      <a href="#" onclick="openTab('contact')">Contact</a>
+    </div>
 
-  <header class="bg-gradient-to-r from-indigo-800 to-blue-900 text-white py-16 text-center">
-    <h1 class="text-4xl md:text-5xl font-bold mb-2 fade-in">Nyenzo's Portfolio</h1>
-    <p class="text-lg md:text-xl fade-in">Data Scientist | Software Developer | Web Developer</p>
-  </header>
+    <div class="content">
+      <header class="text-center mb-8">
+        <h1 class="text-4xl font-bold">Nyenzo's Portfolio</h1>
+        <p class="text-lg">Data Scientist | Software Developer | Web Developer</p>
+      </header>
 
-  <main class="max-w-4xl mx-auto px-4 py-8">
-    <section class="mb-12 fade-in">
-      <h2 class="text-2xl md:text-3xl font-semibold mb-6 flex items-center">
-        <i class="fas fa-code mr-2"></i> Software Projects
-      </h2>
-      <ul class="space-y-4">
-        <li class="project-card bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-transform duration-300">
+      <div id="software" class="tab-content active">
+        <h2 class="text-3xl font-semibold mb-4">💻 Software Projects</h2>
+        <div class="project-card">
           <strong class="text-xl">Aivestor</strong>
-          <p class="text-gray-600 dark:text-gray-400">AI-powered Investment Advisor</p>
-          <a href="https://github.com/Nyenzo/aivestor-ai" class="text-indigo-600 dark:text-indigo-400 hover:underline">View on GitHub</a>
-        </li>
-        <li class="project-card bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-transform duration-300">
+          <p>AI-powered Investment Advisor</p>
+          <a href="https://github.com/Nyenzo/aivestor-ai" class="text-blue-300 hover:underline">View on GitHub</a>
+        </div>
+        <div class="project-card">
           <strong class="text-xl">Trading-bot</strong>
-          <p class="text-gray-600 dark:text-gray-400">A bot that day trades on gold, USDJPY, AUDUSD, and GBPUSD</p>
-          <a href="https://github.com/Nyenzo/aivestor-ai" class="text-indigo-600 dark:text-indigo-400 hover:underline">View on GitHub</a>
-        </li>
-      </ul>
-    </section>
+          <p>A bot that day trades on gold, USDJPY, AUDUSD, and GBPUSD</p>
+          <a href="https://github.com/Nyenzo/aivestor-ai" class="text-blue-300 hover:underline">View on GitHub</a>
+        </div>
+      </div>
 
-    <section class="mb-12 fade-in">
-      <h2 class="text-2xl md:text-3xl font-semibold mb-6 flex items-center">
-        <i class="fas fa-globe mr-2"></i> Web Projects
-      </h2>
-      <ul class="space-y-4">
-        <li class="project-card bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-transform duration-300">
+      <div id="web" class="tab-content">
+        <h2 class="text-3xl font-semibold mb-4">🌐 Web Projects</h2>
+        <div class="project-card">
           <strong class="text-xl">Tule Initiative</strong>
-          <p class="text-gray-600 dark:text-gray-400">Built with Javascript and tailwindcss</p>
-          <a href="https://nyenzo.github.io" class="text-indigo-600 dark:text-indigo-400 hover:underline">Currently Awaiting deployment</a>
-        </li>
-      </ul>
-    </section>
+          <p>Awaiting deployment. Website will be live soon</p>
+          <a href="https://nyenzo.github.io" class="text-blue-300 hover:underline">Visit Site</a>
+        </div>
+      </div>
 
-    <section class="mb-12 fade-in">
-      <h2 class="text-2xl md:text-3xl font-semibold mb-6 flex items-center">
-        <i class="fas fa-brain mr-2"></i> AI & ML Demos
-      </h2>
-      <ul class="space-y-4">
-        <li class="project-card bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md transition-transform duration-300">
-          <strong class="text-xl">AiVestor</strong>
-          <p class="text-gray-600 dark:text-gray-400">AI powered investment advisor</p>
-          <a href="https://your-streamlit-app-url" class="text-indigo-600 dark:text-indigo-400 hover:underline">Awaiting deployment</a>
-        </li>
-      </ul>
-    </section>
+      <div id="ai" class="tab-content">
+        <h2 class="text-3xl font-semibold mb-4">🧠 AI & ML Demos</h2>
+        <div class="project-card">
+          <strong class="text-xl">Aivestor</strong>
+          <p>In development. You can view progess on github</p>
+          <a href="https://your-streamlit-app-url" class="text-blue-300 hover:underline">Launch Demo</a>
+        </div>
+      </div>
 
-    <section class="fade-in">
-      <h2 class="text-2xl md:text-3xl font-semibold mb-6 flex items-center">
-        <i class="fas fa-envelope mr-2"></i> Contact Me
-      </h2>
-      <p class="text-lg">
-        Email: <a href="mailto:nyenzoisabwa@gmail.com" class="text-indigo-600 dark:text-indigo-400 hover:underline">nyenzoisabwa@gmail.com</a><br />
-        LinkedIn: <a href="https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/" class="text-indigo-600 dark:text-indigo-400 hover:underline">linkedin.com/in/nyenzo-isabwa-5b0734352</a><br />
-        GitHub: <a href="https://github.com/Nyenzo" class="text-indigo-600 dark:text-indigo-400 hover:underline">github.com/Nyenzo</a>
-      </p>
-    </section>
-  </main>
+      <div id="contact" class="tab-content">
+        <h2 class="text-3xl font-semibold mb-4">📬 Contact Me</h2>
+        <p>
+          Email: <a href="mailto:nyenzoisabwa@gmail.com" class="text-blue-300 hover:underline">nyenzoisabwa@gmail.com</a><br />
+          LinkedIn: <a href="https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/" class="text-blue-300 hover:underline">linkedin.com/in/nyenzo-isabwa-5b0734352</a><br />
+          GitHub: <a href="https://github.com/Nyenzo" class="text-blue-300 hover:underline">github.com/Nyenzo</a>
+        </p>
+      </div>
+    </div>
+  </div>
 
-  <footer class="text-center py-6 text-gray-600 dark:text-gray-400">
-    © 2025 Nyenzo. Built with <i class="fas fa-laptop-code"></i> + <i class="fas fa-coffee"></i>.
+  <footer class="text-center py-6 text-gray-400">
+    © 2025 Nyenzo. Built with 💻 + ☕.
   </footer>
 
   <script>
-    // Theme toggle functionality
-    function toggleTheme() {
-      document.body.classList.toggle('dark');
-      localStorage.setItem('theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-    }
-
-    // Load saved theme
-    if (localStorage.getItem('theme') === 'dark') {
-      document.body.classList.add('dark');
-    }
-
-    // Fade-in animation on scroll
-    const fadeElements = document.querySelectorAll('.fade-in');
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
+    function openTab(tabName) {
+      const tabs = document.querySelectorAll('.tab-content');
+      tabs.forEach(tab => {
+        tab.classList.remove('active');
+        if (tab.id === tabName) tab.classList.add('active');
       });
-    }, { threshold: 0.1 });
-
-    fadeElements.forEach(element => observer.observe(element));
+    }
   </script>
 </body>
 </html>

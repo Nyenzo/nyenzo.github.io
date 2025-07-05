@@ -184,59 +184,52 @@ class NyenzoChatbot {
     init() {
         this.createChatbotUI();
         this.bindEvents();
+        this.hasShownWelcome = false;
         this.loadWelcomeMessage();
+        this.showInitialTooltip();
     }
 
-    createChatbotUI() {
-        const chatbotHTML = `
-            <div id="chatbot-container" class="chatbot-container">
-                <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot">
-                    <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
-                </button>
-                <div id="chatbot-window" class="chatbot-window">
-                    <div class="chatbot-header">
-                        <div class="chatbot-title">
-                            <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
-                            <span>Chat with me</span>
-                        </div>
-                        <button id="chatbot-close" class="chatbot-close" aria-label="Close chatbot">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    <div id="chatbot-messages" class="chatbot-messages"></div>
-                    <div class="chatbot-input-container">
-                        <input type="text" id="chatbot-input" placeholder="Ask me about My skills, projects, or experience..." />
-                        <button id="chatbot-send" aria-label="Send message">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `;
-        document.body.insertAdjacentHTML('beforeend', chatbotHTML);
-    }
-
-    bindEvents() {
-        const toggle = document.getElementById('chatbot-toggle');
-        const close = document.getElementById('chatbot-close');
-        const input = document.getElementById('chatbot-input');
-        const send = document.getElementById('chatbot-send');
-
-        toggle.addEventListener('click', () => this.toggleChatbot());
-        close.addEventListener('click', () => this.toggleChatbot());
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.handleUserInput();
-        });
-        send.addEventListener('click', () => this.handleUserInput());
+    showInitialTooltip() {
+        // Show a small tooltip to the left of the button on page load
+        const toggleBtn = document.getElementById('chatbot-toggle');
+        if (!toggleBtn) return;
+        let tooltip = document.createElement('div');
+        tooltip.id = 'chatbot-tooltip';
+        tooltip.innerText = 'Hi there 👋';
+        tooltip.style.position = 'absolute';
+        tooltip.style.right = '60px';
+        tooltip.style.bottom = '8px';
+        tooltip.style.background = '#2d3748';
+        tooltip.style.color = '#fff';
+        tooltip.style.padding = '8px 16px';
+        tooltip.style.borderRadius = '16px';
+        tooltip.style.fontSize = '1em';
+        tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
+        tooltip.style.zIndex = '10000';
+        tooltip.style.pointerEvents = 'none';
+        tooltip.style.transition = 'opacity 0.3s';
+        tooltip.style.opacity = '1';
+        toggleBtn.parentNode.appendChild(tooltip);
+        setTimeout(() => {
+            tooltip.style.opacity = '0';
+            setTimeout(() => tooltip.remove(), 400);
+        }, 2500);
     }
 
     toggleChatbot() {
         const window = document.getElementById('chatbot-window');
         this.isOpen = !this.isOpen;
-        window.style.display = this.isOpen ? 'block' : 'none';
-        
-        if (this.isOpen && this.conversationHistory.length === 0) {
+        window.style.display = this.isOpen ? 'flex' : 'none';
+        if (this.isOpen && !this.hasShownWelcome) {
             this.loadWelcomeMessage();
+            this.hasShownWelcome = true;
+        }
+        // Focus input when opening
+        if (this.isOpen) {
+            setTimeout(() => {
+                const input = document.getElementById('chatbot-input');
+                if (input) input.focus();
+            }, 200);
         }
     }
 

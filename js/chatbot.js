@@ -194,29 +194,48 @@ class NyenzoChatbot {
         const chatbotHTML = `
             <div id="chatbot-container" class="chatbot-container">
                 <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot">
-                    <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
+                    <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" />
                 </button>
                 <div id="chatbot-window" class="chatbot-window" style="display:none;">
                     <div class="chatbot-header">
                         <div class="chatbot-title">
-                            <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
-                            <span>Chat with me</span>
+                            <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" />
+                            <span>Nyenzo AI Assistant</span>
                         </div>
                         <button id="chatbot-close" class="chatbot-close" aria-label="Close chatbot">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <div id="chatbot-messages" class="chatbot-messages"></div>
-                    <form id="chatbot-form" class="chatbot-input-container" autocomplete="off">
-                        <input type="text" id="chatbot-input" placeholder="Type your message..." autocomplete="off" />
-                        <button id="chatbot-send" aria-label="Send message" type="submit">
-                            <i class="fas fa-paper-plane"></i>
-                        </button>
-                    </form>
+                    <div id="chatbot-messages" class="chatbot-messages">
+                        <!-- Messages will be added here -->
+                    </div>
+                    <div class="chatbot-input-container">
+                        <form id="chatbot-form" style="display: flex; width: 100%; gap: 12px;">
+                            <textarea 
+                                id="chatbot-input" 
+                                placeholder="Type your message here..." 
+                                rows="1"
+                                style="resize: none; overflow: hidden;"
+                            ></textarea>
+                            <button type="submit" id="chatbot-send" aria-label="Send message">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div id="chatbot-tooltip" class="chatbot-tooltip">
+                    Hi there 👋
                 </div>
             </div>
         `;
         document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+        
+        // Auto-resize textarea
+        const textarea = document.getElementById('chatbot-input');
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
     }
 
     showInitialTooltip() {
@@ -280,11 +299,20 @@ class NyenzoChatbot {
     loadWelcomeMessage() {
         // Only show if not already shown
         if (this.hasShownWelcome) return;
-        const welcomeMessage = {
-            type: 'bot',
-            content: `Hi! I'm Peter Nyenzo Isabwa. 👋 I'm a Data Scientist passionate about machine learning, data analysis, and web development. \n\nYou can ask me anything about:\n• My skills and technical expertise\n• My projects\n• My background and experience\n• My education and certifications\n• Any question you have about me\n\nWhat would you like to know about me?`
-        };
-        this.addMessage(welcomeMessage);
+        
+        // Show typing indicator first
+        this.showTypingIndicator();
+        
+        // Add welcome message after a short delay
+        setTimeout(() => {
+            this.hideTypingIndicator();
+            const welcomeMessage = {
+                type: 'bot',
+                content: `Hi! I'm Peter Nyenzo Isabwa. 👋 I'm a Data Scientist passionate about machine learning, data analysis, and web development. \n\nYou can ask me anything about:\n• My skills and technical expertise\n• My projects\n• My background and experience\n• My education and certifications\n• Any question you have about me\n\nWhat would you like to know about me?`
+            };
+            this.addMessage(welcomeMessage);
+        }, 1000);
+        
         this.hasShownWelcome = true;
     }
 
@@ -297,12 +325,17 @@ class NyenzoChatbot {
         // Add user message
         this.addMessage({ type: 'user', content: userMessage });
         input.value = '';
+        input.style.height = 'auto';
 
-        // Process and respond
+        // Show typing indicator
+        this.showTypingIndicator();
+        
+        // Process and respond with a slight delay for natural feel
         setTimeout(() => {
+            this.hideTypingIndicator();
             const response = this.processUserInput(userMessage);
             this.addMessage({ type: 'bot', content: response });
-        }, 500);
+        }, 800 + Math.random() * 400); // Random delay between 800-1200ms
     }
 
     processUserInput(userInput) {
@@ -1011,20 +1044,56 @@ This challenge taught me the importance of careful system design, thorough testi
         
         const icon = message.type === 'user' ? 'fas fa-user' : 'fas fa-robot';
         const alignment = message.type === 'user' ? 'right' : 'left';
+        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         
         messageElement.innerHTML = `
             <div class="message-content ${alignment}">
                 <div class="message-icon">
                     <i class="${icon}"></i>
                 </div>
-                <div class="message-text">
-                    ${message.content.replace(/\n/g, '<br>')}
+                <div class="message-bubble">
+                    <div class="message-text">
+                        ${message.content.replace(/\n/g, '<br>')}
+                    </div>
                 </div>
+            </div>
+            <div class="message-timestamp ${alignment}">
+                ${timestamp}
             </div>
         `;
         
         messagesContainer.appendChild(messageElement);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    showTypingIndicator() {
+        const messagesContainer = document.getElementById('chatbot-messages');
+        const typingElement = document.createElement('div');
+        typingElement.className = 'chatbot-message bot-message';
+        typingElement.id = 'typing-indicator';
+        
+        typingElement.innerHTML = `
+            <div class="message-content left">
+                <div class="message-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-indicator">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        `;
+        
+        messagesContainer.appendChild(typingElement);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    hideTypingIndicator() {
+        const typingIndicator = document.getElementById('typing-indicator');
+        if (typingIndicator) {
+            typingIndicator.remove();
+        }
     }
 
     bindEvents() {

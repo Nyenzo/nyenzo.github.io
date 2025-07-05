@@ -183,9 +183,9 @@ class NyenzoChatbot {
 
     init() {
         this.createChatbotUI();
-        this.bindEvents();
         this.hasShownWelcome = false;
-        this.loadWelcomeMessage();
+        this.tooltipState = 0; // 0: Hi there, 1: Ask me anything
+        this.bindEvents();
         this.showInitialTooltip();
     }
 
@@ -195,7 +195,7 @@ class NyenzoChatbot {
                 <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot">
                     <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
                 </button>
-                <div id="chatbot-window" class="chatbot-window">
+                <div id="chatbot-window" class="chatbot-window" style="display:none;">
                     <div class="chatbot-header">
                         <div class="chatbot-title">
                             <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
@@ -219,12 +219,12 @@ class NyenzoChatbot {
     }
 
     showInitialTooltip() {
-        // Show a small tooltip to the left of the button on page load
+        // Show a small tooltip to the left of the button on page load or after closing
         const toggleBtn = document.getElementById('chatbot-toggle');
         if (!toggleBtn) return;
         let tooltip = document.createElement('div');
         tooltip.id = 'chatbot-tooltip';
-        tooltip.innerText = 'Hi there 👋';
+        tooltip.innerText = this.tooltipState % 2 === 0 ? 'Hi there 👋' : 'Ask me anything';
         tooltip.style.position = 'absolute';
         tooltip.style.right = '60px';
         tooltip.style.bottom = '8px';
@@ -259,24 +259,22 @@ class NyenzoChatbot {
                 const input = document.getElementById('chatbot-input');
                 if (input) input.focus();
             }, 200);
+        } else {
+            // Alternate tooltip on close
+            this.tooltipState++;
+            this.showInitialTooltip();
         }
     }
 
     loadWelcomeMessage() {
+        // Only show if not already shown
+        if (this.hasShownWelcome) return;
         const welcomeMessage = {
             type: 'bot',
-            content: `Hi! I'm Peter Nyenzo Isabwa. 👋 I'm a Data Scientist passionate about machine learning, data analysis, and web development. 
-
-You can ask me anything about:
-• My skills and technical expertise
-• My projects
-• My background and experience
-• My education and certifications
-• Any question you have about me
-
-What would you like to know about me?`
+            content: `Hi! I'm Peter Nyenzo Isabwa. 👋 I'm a Data Scientist passionate about machine learning, data analysis, and web development. \n\nYou can ask me anything about:\n• My skills and technical expertise\n• My projects\n• My background and experience\n• My education and certifications\n• Any question you have about me\n\nWhat would you like to know about me?`
         };
         this.addMessage(welcomeMessage);
+        this.hasShownWelcome = true;
     }
 
     handleUserInput() {
@@ -332,7 +330,10 @@ What would you like to know about me?`
     }
 
     isSkillQuestion(input) {
-        const skillKeywords = ['skill', 'technology', 'programming', 'language', 'python', 'javascript', 'react', 'node', 'machine learning', 'ai', 'data science', 'know', 'expertise', 'proficient'];
+        const skillKeywords = [
+            'skill', 'technology', 'programming', 'language', 'python', 'javascript', 'react', 'node', 'machine learning', 'ai', 'data science', 'know', 'expertise', 'proficient',
+            'education', 'degree', 'university', 'study', 'school', 'college' // Added education-related keywords
+        ];
         return skillKeywords.some(keyword => input.includes(keyword));
     }
 
@@ -342,7 +343,10 @@ What would you like to know about me?`
     }
 
     isPersonalQuestion(input) {
-        const personalKeywords = ['background', 'experience', 'education', 'about', 'who', 'contact', 'email', 'linkedin', 'your', 'you', 'yourself'];
+        const personalKeywords = [
+            'background', 'experience', 'about', 'who', 'contact', 'email', 'linkedin', 'your', 'you', 'yourself',
+            // Removed education-related keywords from here to avoid routing to personal fallback
+        ];
         return personalKeywords.some(keyword => input.includes(keyword));
     }
 
@@ -376,20 +380,106 @@ What would you like to know about me?`
                 conversational: `Thank you for asking! Machine learning is definitely one of my key strengths - I'm very confident with it. I work with predictive modeling, AI algorithms, and have extensive experience with frameworks like TensorFlow and PyTorch.`
             };
             return responses[this.responseStyle] || responses.conversational;
-        } else if (input.includes('education') || input.includes('degree') || input.includes('university')) {
+        } else if (
+            input.includes('education') ||
+            input.includes('degree') ||
+            input.includes('university') ||
+            input.includes('study') ||
+            input.includes('school') ||
+            input.includes('college')
+        ) {
             const responses = {
-                simple: `That's a great question! I have a Bachelor's degree in Computer Science from the University of Nairobi. I focused on data structures, algorithms, and software engineering. I was on the Dean's List and won a programming competition!`,
-                technical: `Thank you for your question! I hold a Bachelor's degree in Computer Science from the University of Nairobi. My academic focus included advanced data structures, algorithms, software engineering principles, and computer architecture. I achieved Dean's List recognition and won the university programming competition. My coursework provided a strong foundation in theoretical computer science and practical software development.`,
-                casual: `That's a great question! I got my Bachelor's in Computer Science from the University of Nairobi. I was pretty good at it - made the Dean's List and even won a programming competition! 🎓 Here's a joke: Why do programmers prefer dark mode? Because light attracts bugs! 🐛`,
-                conversational: `Thank you for asking! I have a Bachelor's degree in Computer Science from the University of Nairobi. I focused on data structures, algorithms, and software engineering. I was on the Dean's List and won a programming competition, which really helped build my problem-solving skills.`
+                simple: `That's a great question! I have a Bachelor of Science in Mathematics and Computer Science from JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY. I focused on mathematics, computer science, data analysis, and machine learning.`,
+                technical: `Thank you for your question! I hold a Bachelor of Science in Mathematics and Computer Science from JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY (Sep 2018 - May 2025). My academic focus included mathematics, computer science, data analysis, and machine learning. I also completed a research project on pregnancy outcomes prediction.`,
+                casual: `That's a great question! I studied at JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY, majoring in Mathematics and Computer Science. 🎓`,
+                conversational: `Thank you for asking! I have a Bachelor of Science in Mathematics and Computer Science from JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY. My studies focused on mathematics, computer science, and data analysis.`
+            };
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('huawei') || input.includes('ai development framework')) {
+            const responses = {
+                simple: `That's a great question! I'm currently pursuing the Huawei AI Development Framework certification (Feb 2025 - Jun 2025). This covers comprehensive training in Huawei's AI development ecosystem, including their cloud AI services and frameworks for deploying machine learning models.`,
+                technical: `Thank you for your question! **Huawei AI Development Framework Certification (Feb 2025 - Jun 2025)**
+
+This certification program covers:
+• Comprehensive training in Huawei's AI development ecosystem
+• Expertise in Huawei Cloud AI services and frameworks
+• Advanced machine learning model deployment on Huawei platforms
+• Integration of AI solutions with Huawei's enterprise infrastructure
+• Model training and optimization using Huawei's AI tools
+• Deployment strategies for production AI applications
+
+**Key Learning Areas:**
+• Huawei Cloud AI services and APIs
+• Model development and training workflows
+• AI model deployment and scaling
+• Enterprise AI solution architecture
+• Performance optimization and monitoring
+
+This certification demonstrates my commitment to staying current with enterprise AI development frameworks and cloud-based AI solutions.`,
+                casual: `That's a great question! I'm working on the Huawei AI Development Framework certification right now! It's pretty intense - learning all about Huawei's AI ecosystem and how to deploy machine learning models on their platforms. Here's a joke: Why did the AI go to therapy? Because it had too many deep issues! 🤖`,
+                conversational: `Thank you for asking! I'm currently pursuing the Huawei AI Development Framework certification (Feb 2025 - Jun 2025). This covers comprehensive training in Huawei's AI development ecosystem, including their cloud AI services and frameworks for deploying machine learning models.`
+            };
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('alx') || input.includes('software engineering')) {
+            const responses = {
+                simple: `That's a great question! I completed the ALX Software Engineering program (Feb 2023 - Apr 2024). This intensive program covered software engineering principles, advanced Python programming, JavaScript full-stack development, and modern web development practices.`,
+                technical: `Thank you for your question! **ALX Software Engineering Certification (Feb 2023 - Apr 2024)**
+
+This comprehensive program covered:
+• Intensive software engineering principles and practices
+• Advanced Python programming and web development
+• JavaScript full-stack development with modern frameworks
+• Database design and API development
+• DevOps practices and deployment strategies
+• Agile methodologies and project management
+
+**Key Learning Areas:**
+• Python: Advanced programming concepts, web frameworks, data processing
+• JavaScript: Full-stack development, modern frameworks, API development
+• Database Design: SQL and NoSQL databases, data modeling
+• DevOps: Deployment strategies, containerization, CI/CD pipelines
+• Software Architecture: Design patterns, scalable system design
+• Project Management: Agile methodologies, team collaboration
+
+**Projects Completed:**
+• Full-stack web applications using Python and JavaScript
+• API development and database integration
+• Deployment and DevOps implementation
+• Collaborative software development projects
+
+This certification provided a solid foundation in modern software engineering practices and full-stack development.`,
+                casual: `That's a great question! I did the ALX Software Engineering program - it was pretty intense! Learned a ton about Python, JavaScript, web development, and software engineering principles. Here's a fun fact: JavaScript was created in just 10 days - talk about a quick prototype! ⚡`,
+                conversational: `Thank you for asking! I completed the ALX Software Engineering program (Feb 2023 - Apr 2024). This intensive program covered software engineering principles, advanced Python programming, JavaScript full-stack development, and modern web development practices.`
             };
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('certification') || input.includes('certified')) {
             const responses = {
-                simple: `That's an excellent question! I have several certifications including AWS Solutions Architect, Google Cloud Data Engineer, Azure Data Scientist, and TensorFlow Developer. These help me stay current with cloud and AI technologies.`,
-                technical: `Thank you for your question! I hold multiple industry-recognized certifications: AWS Certified Solutions Architect (2023), Google Cloud Professional Data Engineer (2023), Microsoft Azure Data Scientist Associate (2022), and TensorFlow Developer Certificate (2022). These certifications validate my expertise in cloud architecture, data engineering, machine learning, and deep learning technologies. They demonstrate my commitment to staying current with industry best practices and emerging technologies.`,
-                casual: `That's a great question! I've got several certifications - AWS, Google Cloud, Azure, and TensorFlow. They're like badges of honor in the tech world! 🏆 Here's a joke: Why do certifications matter? Because they're like a resume's way of saying "I can actually do this stuff!" 😄`,
-                conversational: `Thank you for asking! I have several certifications including AWS Solutions Architect, Google Cloud Data Engineer, Azure Data Scientist, and TensorFlow Developer. These help me stay current with cloud and AI technologies and demonstrate my expertise in these areas.`
+                simple: `That's an excellent question! I have several certifications including Huawei AI Development Framework, ALX Software Engineering, AWS Solutions Architect, Google Cloud Data Engineer, Azure Data Scientist, and TensorFlow Developer. These help me stay current with AI, cloud, and software development technologies.`,
+                technical: `Thank you for your question! I hold multiple industry-recognized certifications:
+
+**Huawei AI Development Framework (Feb 2025 - Jun 2025)**
+• Comprehensive training in Huawei's AI development ecosystem
+• Expertise in Huawei Cloud AI services and frameworks
+• Advanced machine learning model deployment on Huawei platforms
+• Integration of AI solutions with Huawei's enterprise infrastructure
+
+**ALX Software Engineering (Feb 2023 - Apr 2024)**
+• Intensive software engineering principles and practices
+• Advanced Python programming and web development
+• JavaScript full-stack development with modern frameworks
+• Database design and API development
+• DevOps practices and deployment strategies
+• Agile methodologies and project management
+
+**Additional Certifications:**
+• AWS Certified Solutions Architect (2023)
+• Google Cloud Professional Data Engineer (2023)
+• Microsoft Azure Data Scientist Associate (2022)
+• TensorFlow Developer Certificate (2022)
+
+These certifications validate my expertise across AI development, cloud architecture, data engineering, and software development. They demonstrate my commitment to staying current with industry best practices and emerging technologies.`,
+                casual: `That's a great question! I've got several certifications - Huawei AI Development Framework, ALX Software Engineering, AWS, Google Cloud, Azure, and TensorFlow. They're like badges of honor in the tech world! 🏆 Here's a joke: Why do certifications matter? Because they're like a resume's way of saying "I can actually do this stuff!" 😄`,
+                conversational: `Thank you for asking! I have several certifications including Huawei AI Development Framework, ALX Software Engineering, AWS Solutions Architect, Google Cloud Data Engineer, Azure Data Scientist, and TensorFlow Developer. These help me stay current with AI, cloud, and software development technologies and demonstrate my expertise in these areas.`
             };
             return responses[this.responseStyle] || responses.conversational;
         } else {
@@ -839,6 +929,45 @@ This challenge taught me the importance of careful system design, thorough testi
         
         messagesContainer.appendChild(messageElement);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    bindEvents() {
+        const toggle = document.getElementById('chatbot-toggle');
+        const close = document.getElementById('chatbot-close');
+        const input = document.getElementById('chatbot-input');
+        const send = document.getElementById('chatbot-send');
+        const form = document.getElementById('chatbot-form');
+        const chatbotWindow = document.getElementById('chatbot-window');
+        const chatbotContainer = document.getElementById('chatbot-container');
+
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleChatbot();
+        });
+        close.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.toggleChatbot();
+        });
+        // Use form submit for accessibility and reliability
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleUserInput();
+        });
+        // Also allow Enter key in input
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.handleUserInput();
+            }
+        });
+        // Close chatbot when clicking outside the chat window
+        document.addEventListener('mousedown', (event) => {
+            if (this.isOpen && chatbotWindow.style.display !== 'none') {
+                if (!chatbotWindow.contains(event.target) && !toggle.contains(event.target)) {
+                    this.toggleChatbot();
+                }
+            }
+        });
     }
 }
 

@@ -1,4 +1,124 @@
 // Advanced AI Chatbot for Nyenzo Isabwa
+class SentimentModel {
+    constructor() {
+        this.vocabulary = new Set();
+        this.wordFrequencies = {};
+        this.sentimentWeights = {};
+        this.learningRate = 0.01;
+        this.conversationPatterns = [];
+        this.responseTemplates = [];
+        this.initializeModel();
+    }
+
+    initializeModel() {
+        // Initialize with basic sentiment words
+        const positiveWords = ['great', 'awesome', 'good', 'happy', 'excited', 'love', 'amazing', 'cool', 'fantastic', 'excellent', 'wonderful', 'perfect', 'brilliant', 'outstanding'];
+        const negativeWords = ['bad', 'sad', 'terrible', 'awful', 'upset', 'hate', 'poor', 'horrible', 'disappointing', 'frustrated', 'angry', 'worried', 'confused'];
+        
+        positiveWords.forEach(word => {
+            this.vocabulary.add(word);
+            this.sentimentWeights[word] = 1.0;
+        });
+        
+        negativeWords.forEach(word => {
+            this.vocabulary.add(word);
+            this.sentimentWeights[word] = -1.0;
+        });
+    }
+
+    analyzeSentiment(text) {
+        const words = text.toLowerCase().split(/\s+/);
+        let score = 0;
+        let wordCount = 0;
+
+        words.forEach(word => {
+            if (this.sentimentWeights[word]) {
+                score += this.sentimentWeights[word];
+                wordCount++;
+            }
+        });
+
+        const averageScore = wordCount > 0 ? score / wordCount : 0;
+        
+        if (averageScore > 0.1) return 'positive';
+        if (averageScore < -0.1) return 'negative';
+        return 'neutral';
+    }
+
+    learnFromInteraction(userInput, botResponse, userFeedback = null) {
+        // Extract words and update vocabulary
+        const words = userInput.toLowerCase().split(/\s+/);
+        words.forEach(word => {
+            this.vocabulary.add(word);
+            if (!this.wordFrequencies[word]) {
+                this.wordFrequencies[word] = 0;
+            }
+            this.wordFrequencies[word]++;
+        });
+
+        // Store conversation pattern
+        this.conversationPatterns.push({
+            input: userInput,
+            response: botResponse,
+            timestamp: new Date(),
+            feedback: userFeedback
+        });
+
+        // Update sentiment weights based on context
+        if (userFeedback) {
+            words.forEach(word => {
+                if (!this.sentimentWeights[word]) {
+                    this.sentimentWeights[word] = 0;
+                }
+                this.sentimentWeights[word] += userFeedback * this.learningRate;
+            });
+        }
+
+        // Limit conversation patterns to last 100 interactions
+        if (this.conversationPatterns.length > 100) {
+            this.conversationPatterns = this.conversationPatterns.slice(-100);
+        }
+    }
+
+    generatePersonalizedResponse(input, context) {
+        // Find similar past interactions
+        const similarPatterns = this.conversationPatterns.filter(pattern => 
+            pattern.input.toLowerCase().includes(input.toLowerCase()) ||
+            input.toLowerCase().includes(pattern.input.toLowerCase())
+        );
+
+        if (similarPatterns.length > 0) {
+            // Use the most recent similar pattern
+            const recentPattern = similarPatterns[similarPatterns.length - 1];
+            return this.adaptResponse(recentPattern.response, context);
+        }
+
+        return null; // Fall back to rule-based response
+    }
+
+    adaptResponse(templateResponse, context) {
+        // Simple adaptation - can be enhanced with more sophisticated NLP
+        let adaptedResponse = templateResponse;
+        
+        // Personalize based on context
+        if (context.sentiment === 'positive') {
+            adaptedResponse = adaptedResponse.replace(/\./g, '! 😊');
+        } else if (context.sentiment === 'negative') {
+            adaptedResponse = adaptedResponse.replace(/\./g, '... I understand.');
+        }
+
+        return adaptedResponse;
+    }
+
+    getModelStats() {
+        return {
+            vocabularySize: this.vocabulary.size,
+            conversationPatterns: this.conversationPatterns.length,
+            averageSentimentWeight: Object.values(this.sentimentWeights).reduce((a, b) => a + b, 0) / Object.keys(this.sentimentWeights).length || 0
+        };
+    }
+}
+
 class NyenzoChatbot {
     constructor() {
         this.knowledgeBase = this.initializeKnowledgeBase();
@@ -8,6 +128,8 @@ class NyenzoChatbot {
         this.hasShownWelcome = false;
         this.tooltipState = 0; // 0: Hi there, 1: Ask me anything
         this.followUpQuestion = null; // Store follow-up question
+        this.mlModel = new SentimentModel(); // Initialize ML model
+        this.learningMode = true; // Enable continuous learning
         this.init();
     }
 
@@ -272,13 +394,13 @@ class NyenzoChatbot {
         tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
         tooltip.style.zIndex = '10000';
         tooltip.style.pointerEvents = 'none';
-        tooltip.style.transition = 'opacity 0.5s'; // Slower fade
+        tooltip.style.transition = 'opacity 1s'; // Slower fade
         tooltip.style.opacity = '1';
         toggleBtn.parentNode.appendChild(tooltip);
         setTimeout(() => {
             tooltip.style.opacity = '0';
-            setTimeout(() => tooltip.remove(), 3500); // Extended to 3.5s
-        }, 3000); // Visible for 3s before fading
+            setTimeout(() => tooltip.remove(), 1000); // Wait for fade out to complete
+        }, 3500); // Visible for 3.5s before fading
     }
 
     startPeriodicTooltips() {
@@ -287,7 +409,7 @@ class NyenzoChatbot {
                 this.tooltipState++;
                 this.showInitialTooltip();
             }
-        }, 10000);
+        }, 12000);
     }
 
     toggleChatbot() {
@@ -351,14 +473,15 @@ class NyenzoChatbot {
     }
 
     analyzeSentiment(input) {
-        const { positive, negative, neutral } = this.knowledgeBase.sentiments;
-        let score = 0;
+        // Use ML model for sentiment analysis
+        const sentiment = this.mlModel.analyzeSentiment(input);
+        
+        // Update sentiment score based on ML model
+        if (sentiment === 'positive') this.sentimentScore = 1;
+        else if (sentiment === 'negative') this.sentimentScore = -1;
+        else this.sentimentScore = 0;
 
-        if (positive.some(word => input.toLowerCase().includes(word))) score += 1;
-        if (negative.some(word => input.toLowerCase().includes(word))) score -= 1;
-
-        this.sentimentScore = score;
-        return score > 0 ? 'positive' : score < 0 ? 'negative' : 'neutral';
+        return sentiment;
     }
 
     processUserInput(userInput) {
@@ -367,36 +490,61 @@ class NyenzoChatbot {
 
         this.responseStyle = this.determineResponseStyle(input);
         const intent = this.detectIntent(input);
+        const sentiment = this.analyzeSentiment(userInput);
 
+        // Try ML model for personalized response first
+        const context = { sentiment, intent, responseStyle: this.responseStyle };
+        const mlResponse = this.mlModel.generatePersonalizedResponse(userInput, context);
+        
+        if (mlResponse && this.learningMode) {
+            // Use ML-generated response
+            this.mlModel.learnFromInteraction(userInput, mlResponse);
+            return mlResponse;
+        }
+
+        // Fall back to rule-based responses
+        let response;
         if (this.isGreeting(input)) {
-            return this.handleGreeting(input);
+            response = this.handleGreeting(input);
         } else if (intent === 'skill' || this.isSkillQuestion(input)) {
-            return this.handleSkillQuestion(input);
+            response = this.handleSkillQuestion(input);
         } else if (intent === 'project' || this.isProjectQuestion(input)) {
-            return this.handleProjectQuestion(input);
+            response = this.handleProjectQuestion(input);
         } else if (intent === 'personal' || this.isPersonalQuestion(input)) {
-            return this.handlePersonalQuestion(input);
+            response = this.handlePersonalQuestion(input);
         } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
-            return this.handleInterviewQuestion(input);
+            response = this.handleInterviewQuestion(input);
         } else {
             // Fallback to closest relevant intent if no match
             const lastIntent = this.conversationHistory.length > 0 ? this.detectIntent(this.conversationHistory[this.conversationHistory.length - 1].user.toLowerCase()) : null;
             if (lastIntent) {
                 switch (lastIntent) {
                     case 'skill':
-                        return this.handleSkillQuestion(input) || "I'm not sure about that, but I can tell you more about my skills if you'd like!";
+                        response = this.handleSkillQuestion(input) || "I'm not sure about that, but I can tell you more about my skills if you'd like!";
+                        break;
                     case 'project':
-                        return this.handleProjectQuestion(input) || "That’s a new one! Maybe we can talk more about my projects instead?";
+                        response = this.handleProjectQuestion(input) || "That’s a new one! Maybe we can talk more about my projects instead?";
+                        break;
                     case 'personal':
-                        return this.handlePersonalQuestion(input) || "I’m not certain about that, but I can share more about my background if it helps!";
+                        response = this.handlePersonalQuestion(input) || "I’m not certain about that, but I can share more about my background if it helps!";
+                        break;
                     case 'interview':
-                        return this.handleInterviewQuestion(input) || "Hmm, not sure on that one—want to discuss my strengths or goals instead?";
+                        response = this.handleInterviewQuestion(input) || "Hmm, not sure on that one—want to discuss my strengths or goals instead?";
+                        break;
                     default:
-                        return "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
+                        response = "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
                 }
+            } else {
+                response = "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
             }
-            return "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
         }
+
+        // Learn from this interaction
+        if (this.learningMode) {
+            this.mlModel.learnFromInteraction(userInput, response);
+        }
+
+        return response;
     }
 
     detectIntent(input) {

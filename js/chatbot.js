@@ -189,6 +189,35 @@ class NyenzoChatbot {
         this.showInitialTooltip();
     }
 
+    createChatbotUI() {
+        const chatbotHTML = `
+            <div id="chatbot-container" class="chatbot-container">
+                <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot">
+                    <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
+                </button>
+                <div id="chatbot-window" class="chatbot-window">
+                    <div class="chatbot-header">
+                        <div class="chatbot-title">
+                            <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
+                            <span>Chat with me</span>
+                        </div>
+                        <button id="chatbot-close" class="chatbot-close" aria-label="Close chatbot">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div id="chatbot-messages" class="chatbot-messages"></div>
+                    <form id="chatbot-form" class="chatbot-input-container" autocomplete="off">
+                        <input type="text" id="chatbot-input" placeholder="Type your message..." autocomplete="off" />
+                        <button id="chatbot-send" aria-label="Send message" type="submit">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+    }
+
     showInitialTooltip() {
         // Show a small tooltip to the left of the button on page load
         const toggleBtn = document.getElementById('chatbot-toggle');

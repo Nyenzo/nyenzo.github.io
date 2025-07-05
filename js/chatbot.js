@@ -190,24 +190,23 @@ class NyenzoChatbot {
     createChatbotUI() {
         const chatbotHTML = `
             <div id="chatbot-container" class="chatbot-container">
-                <div id="chatbot-toggle" class="chatbot-toggle">
-                    <i class="fas fa-robot"></i>
-                    <span>Ask Nyenzo</span>
-                </div>
+                <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot">
+                    <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:48px;height:48px;border-radius:50%;object-fit:cover;" />
+                </button>
                 <div id="chatbot-window" class="chatbot-window">
                     <div class="chatbot-header">
                         <div class="chatbot-title">
-                            <i class="fas fa-robot"></i>
+                            <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
                             <span>Nyenzo AI Assistant</span>
                         </div>
-                        <button id="chatbot-close" class="chatbot-close">
+                        <button id="chatbot-close" class="chatbot-close" aria-label="Close chatbot">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                     <div id="chatbot-messages" class="chatbot-messages"></div>
                     <div class="chatbot-input-container">
                         <input type="text" id="chatbot-input" placeholder="Ask me about Nyenzo's skills, projects, or experience..." />
-                        <button id="chatbot-send">
+                        <button id="chatbot-send" aria-label="Send message">
                             <i class="fas fa-paper-plane"></i>
                         </button>
                     </div>

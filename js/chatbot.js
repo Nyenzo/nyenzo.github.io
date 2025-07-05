@@ -543,14 +543,18 @@ class NyenzoChatbot {
         const messageElement = document.createElement('div');
         messageElement.className = `chatbot-message ${message.type}-message`;
         
-        const icon = message.type === 'user' ? 'fas fa-user' : 'fas fa-robot';
         const alignment = message.type === 'user' ? 'right' : 'left';
         const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        
+        // Use custom chatbot icon for bot messages, user icon for user messages
+        const iconContent = message.type === 'user' 
+            ? '<i class="fas fa-user"></i>' 
+            : '<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />';
         
         messageElement.innerHTML = `
             <div class="message-content ${alignment}">
                 <div class="message-icon">
-                    <i class="${icon}"></i>
+                    ${iconContent}
                 </div>
                 <div class="message-bubble">
                     <div class="message-text">
@@ -576,7 +580,7 @@ class NyenzoChatbot {
         typingElement.innerHTML = `
             <div class="message-content left">
                 <div class="message-icon">
-                    <i class="fas fa-robot"></i>
+                    <img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
                 </div>
                 <div class="typing-indicator">
                     <div class="typing-dot"></div>

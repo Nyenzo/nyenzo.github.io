@@ -262,13 +262,13 @@ class NyenzoChatbot {
         tooltip.style.boxShadow = '0 2px 8px rgba(0,0,0,0.12)';
         tooltip.style.zIndex = '10000';
         tooltip.style.pointerEvents = 'none';
-        tooltip.style.transition = 'opacity 0.3s';
+        tooltip.style.transition = 'opacity 0.5s'; // Slower fade
         tooltip.style.opacity = '1';
         toggleBtn.parentNode.appendChild(tooltip);
         setTimeout(() => {
             tooltip.style.opacity = '0';
-            setTimeout(() => tooltip.remove(), 400);
-        }, 2500);
+            setTimeout(() => tooltip.remove(), 3500); // Extended to 3.5s
+        }, 3000); // Visible for 3s before fading
     }
 
     startPeriodicTooltips() {
@@ -369,7 +369,23 @@ class NyenzoChatbot {
         } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
             return this.handleInterviewQuestion(input);
         } else {
-            return this.generateGeneralResponse(input);
+            // Fallback to closest relevant intent if no match
+            const lastIntent = this.conversationHistory.length > 0 ? this.detectIntent(this.conversationHistory[this.conversationHistory.length - 1].user.toLowerCase()) : null;
+            if (lastIntent) {
+                switch (lastIntent) {
+                    case 'skill':
+                        return this.handleSkillQuestion(input) || "I'm not sure about that, but I can tell you more about my skills if you'd like!";
+                    case 'project':
+                        return this.handleProjectQuestion(input) || "That’s a new one! Maybe we can talk more about my projects instead?";
+                    case 'personal':
+                        return this.handlePersonalQuestion(input) || "I’m not certain about that, but I can share more about my background if it helps!";
+                    case 'interview':
+                        return this.handleInterviewQuestion(input) || "Hmm, not sure on that one—want to discuss my strengths or goals instead?";
+                    default:
+                        return "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
+                }
+            }
+            return "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
         }
     }
 
@@ -424,25 +440,26 @@ class NyenzoChatbot {
 
     handleGreeting(input) {
         const sentiment = this.analyzeSentiment(input);
-        const time = new Date().toLocaleTimeString('en-US', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit' }); // 11:29 PM EAT
+        const now = new Date();
+        const time = now.toLocaleTimeString('en-US', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit' });
         const responses = {
             positive: {
-                simple: `Hi! I'm doing great, thanks! It's 11:29 PM here in Nairobi - a bit late, but I'm excited to chat with you. What’s on your mind?`,
-                technical: `Greetings! I'm operating optimally, thank you! It's 11:29 PM in Nairobi. I'm ready to assist with any technical inquiries. What would you like to explore?`,
-                casual: `Hey there! I'm feeling awesome, thanks! It's 11:29 PM in Nairobi - late night vibes! What’s up with you? 😄`,
-                conversational: `Hello! I'm doing well, thank you! It's 11:29 PM here in Nairobi. Nice to chat with you - how can I assist you tonight?`
+                simple: `Hi! I'm doing great, thanks! It's ${time} here in Nairobi - perfect timing! What’s on your mind?`,
+                technical: `Greetings! I'm operating optimally, thank you! It's ${time} in Nairobi. Ready for technical inquiries - what would you like to explore?`,
+                casual: `Hey there! I'm feeling awesome, thanks! It's ${time} in Nairobi - late night vibes! What’s up? 😄`,
+                conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi. Nice to chat - how can I assist you?`
             },
             negative: {
-                simple: `Hi! Sorry you might be feeling down. I'm doing okay, thanks for asking! It's 11:29 PM in Nairobi. Want to talk about it or switch to something else?`,
-                technical: `Greetings! I detect a potential negative sentiment. I'm functioning within parameters, thank you! It's 11:29 PM in Nairobi. How can I assist with a technical solution?`,
-                casual: `Hey! Seems like you might be having a rough night - sorry about that! I'm doing alright, thanks! It's 11:29 PM in Nairobi. Want to chat or switch gears? 😊`,
-                conversational: `Hello! It seems you might be feeling down - I’m sorry to hear that. I'm doing okay, thanks! It's 11:29 PM in Nairobi. How can I help you tonight?`
+                simple: `Hi! Sorry you might be feeling down. I'm okay, thanks for asking! It's ${time} in Nairobi. Want to talk or switch topics?`,
+                technical: `Greetings! I detect a potential negative sentiment. I'm functioning within parameters, thank you! It's ${time} in Nairobi. How can I assist technically?`,
+                casual: `Hey! Seems like you might be having a rough night - sorry! I'm alright, thanks! It's ${time} in Nairobi. Want to chat or change it up? 😊`,
+                conversational: `Hello! It seems you might be feeling down - I’m sorry. I'm okay, thanks! It's ${time} in Nairobi. How can I help?`
             },
             neutral: {
-                simple: `Hi! I'm doing fine, thanks! It's 11:29 PM in Nairobi. How can I assist you tonight?`,
-                technical: `Greetings! I'm operating at standard efficiency, thank you! It's 11:29 PM in Nairobi. What technical topic would you like to discuss?`,
-                casual: `Hey! I'm doing okay, thanks! It's 11:29 PM here in Nairobi. What’s on your mind? 😊`,
-                conversational: `Hello! I'm doing well, thank you! It's 11:29 PM in Nairobi. How can I help you tonight?`
+                simple: `Hi! I'm doing fine, thanks! It's ${time} in Nairobi. How can I assist you?`,
+                technical: `Greetings! I'm operating at standard efficiency, thank you! It's ${time} in Nairobi. What technical topic interests you?`,
+                casual: `Hey! I'm doing okay, thanks! It's ${time} here in Nairobi. What’s on your mind? 😊`,
+                conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi. How can I help you?`
             }
         };
 
@@ -517,7 +534,7 @@ class NyenzoChatbot {
         };
         
         const styleResponses = responses[this.responseStyle] || responses.conversational;
-        this.followUpQuestion = lastInput.includes('skill') ? "Want to dive deeper into a specific skill?" : "What else can I tell you about?";
+        this.followUpQuestion = lastInput.includes('skill') ? "Want to dive deeper into a specific skill?" : lastInput.includes('project') ? "Curious about another project?" : "What else can I tell you about?";
         return styleResponses[Math.floor(Math.random() * styleResponses.length)];
     }
 

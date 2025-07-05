@@ -325,6 +325,8 @@ class NyenzoChatbot {
     init() {
         this.createChatbotUI();
         this.bindEvents();
+        this.loadModelFromStorage();
+        this.trackPersistence();
         this.showInitialTooltip();
         this.startPeriodicTooltips();
     }
@@ -497,12 +499,10 @@ class NyenzoChatbot {
         const mlResponse = this.mlModel.generatePersonalizedResponse(userInput, context);
         
         if (mlResponse && this.learningMode) {
-            // Use ML-generated response
             this.mlModel.learnFromInteraction(userInput, mlResponse);
             return mlResponse;
         }
 
-        // Fall back to rule-based responses
         let response;
         if (this.isGreeting(input)) {
             response = this.handleGreeting(input);
@@ -515,34 +515,43 @@ class NyenzoChatbot {
         } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
             response = this.handleInterviewQuestion(input);
         } else {
-            // Fallback to closest relevant intent if no match
-            const lastIntent = this.conversationHistory.length > 0 ? this.detectIntent(this.conversationHistory[this.conversationHistory.length - 1].user.toLowerCase()) : null;
-            if (lastIntent) {
-                switch (lastIntent) {
-                    case 'skill':
-                        response = this.handleSkillQuestion(input) || "I'm not sure about that, but I can tell you more about my skills if you'd like!";
-                        break;
-                    case 'project':
-                        response = this.handleProjectQuestion(input) || "That’s a new one! Maybe we can talk more about my projects instead?";
-                        break;
-                    case 'personal':
-                        response = this.handlePersonalQuestion(input) || "I’m not certain about that, but I can share more about my background if it helps!";
-                        break;
-                    case 'interview':
-                        response = this.handleInterviewQuestion(input) || "Hmm, not sure on that one—want to discuss my strengths or goals instead?";
-                        break;
-                    default:
-                        response = "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
-                }
+            // Sentiment-aware fallback
+            if (sentiment === 'negative') {
+                response = "I'm sorry to hear that. If you'd like to talk about it or need support, I'm here to listen. Would you like to share more or talk about something that might help?";
+            } else if (sentiment === 'positive') {
+                response = "I'm glad to hear that! If you want to share more good news or talk about anything else, I'm here for you.";
             } else {
-                response = "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
+                // Fallback to closest relevant intent if no match
+                const lastIntent = this.conversationHistory.length > 0 ? this.detectIntent(this.conversationHistory[this.conversationHistory.length - 1].user.toLowerCase()) : null;
+                if (lastIntent) {
+                    switch (lastIntent) {
+                        case 'skill':
+                            response = this.handleSkillQuestion(input) || "I'm not sure about that, but I can tell you more about my skills if you'd like!";
+                            break;
+                        case 'project':
+                            response = this.handleProjectQuestion(input) || "That’s a new one! Maybe we can talk more about my projects instead?";
+                            break;
+                        case 'personal':
+                            response = this.handlePersonalQuestion(input) || "I’m not certain about that, but I can share more about my background if it helps!";
+                            break;
+                        case 'interview':
+                            response = this.handleInterviewQuestion(input) || "Hmm, not sure on that one—want to discuss my strengths or goals instead?";
+                            break;
+                        default:
+                            response = "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
+                    }
+                } else {
+                    response = "I’m not sure I have an answer for that, but I’m here to help with anything tech-related or personal. What else can I assist with?";
+                }
             }
         }
 
-        // Learn from this interaction
         if (this.learningMode) {
             this.mlModel.learnFromInteraction(userInput, response);
         }
+
+        // Check for new fact/correction pattern
+        this.checkForNewFact(userInput, response);
 
         return response;
     }
@@ -839,35 +848,123 @@ class NyenzoChatbot {
 
     addMessage(message) {
         const messagesContainer = document.getElementById('chatbot-messages');
-        const messageElement = document.createElement('div');
-        messageElement.className = `chatbot-message ${message.type}-message`;
-        
-        const alignment = message.type === 'user' ? 'right' : 'left';
-        const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        
-        // Use custom chatbot icon for bot messages, user icon for user messages
-        const iconContent = message.type === 'user' 
-            ? '<i class="fas fa-user"></i>' 
-            : '<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />';
-        
-        messageElement.innerHTML = `
-            <div class="message-content ${alignment}">
-                <div class="message-icon">
-                    ${iconContent}
-                </div>
-                <div class="message-bubble">
-                    <div class="message-text">
-                        ${message.content.replace(/\n/g, '<br>')}
-                    </div>
-                </div>
-            </div>
-            <div class="message-timestamp ${alignment}">
-                ${timestamp}
-            </div>
-        `;
-        
-        messagesContainer.appendChild(messageElement);
+        if (!messagesContainer) return;
+
+        const messageElem = document.createElement('div');
+        messageElem.className = `chatbot-message ${message.type === 'user' ? 'user-message' : 'bot-message'}`;
+
+        const contentElem = document.createElement('div');
+        contentElem.className = 'message-content ' + (message.type === 'user' ? 'right' : 'left');
+
+        if (message.type === 'bot') {
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
+            contentElem.appendChild(bubble);
+
+            // Add feedback buttons
+            const feedbackContainer = document.createElement('div');
+            feedbackContainer.style.display = 'flex';
+            feedbackContainer.style.gap = '8px';
+            feedbackContainer.style.marginTop = '4px';
+            feedbackContainer.innerHTML = `
+                <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful">👍</button>
+                <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful">👎</button>
+            `;
+            contentElem.appendChild(feedbackContainer);
+        } else {
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
+            contentElem.appendChild(bubble);
+        }
+
+        // Timestamp
+        const timestampElem = document.createElement('div');
+        timestampElem.className = 'message-timestamp';
+        const now = new Date();
+        timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        contentElem.appendChild(timestampElem);
+
+        messageElem.appendChild(contentElem);
+        messagesContainer.appendChild(messageElem);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Feedback event
+        if (message.type === 'bot') {
+            const feedbackBtns = messageElem.querySelectorAll('.chatbot-feedback-btn');
+            feedbackBtns.forEach(btn => {
+                btn.onclick = (e) => {
+                    const feedback = parseInt(btn.getAttribute('data-feedback'));
+                    this.mlModel.learnFromInteraction(
+                        this.conversationHistory[this.conversationHistory.length - 1].user,
+                        message.content,
+                        feedback
+                    );
+                    btn.disabled = true;
+                    btn.style.opacity = 0.5;
+                };
+            });
+        }
+    }
+
+    // Model persistence
+    saveModelToStorage() {
+        const state = {
+            vocabulary: Array.from(this.mlModel.vocabulary),
+            wordFrequencies: this.mlModel.wordFrequencies,
+            sentimentWeights: this.mlModel.sentimentWeights,
+            conversationPatterns: this.mlModel.conversationPatterns
+        };
+        localStorage.setItem('nyenzoChatbotModel', JSON.stringify(state));
+    }
+
+    loadModelFromStorage() {
+        const state = localStorage.getItem('nyenzoChatbotModel');
+        if (state) {
+            const data = JSON.parse(state);
+            this.mlModel.vocabulary = new Set(data.vocabulary);
+            this.mlModel.wordFrequencies = data.wordFrequencies;
+            this.mlModel.sentimentWeights = data.sentimentWeights;
+            this.mlModel.conversationPatterns = data.conversationPatterns;
+        }
+    }
+
+    // Call saveModelToStorage every 10 interactions and on window unload
+    trackPersistence() {
+        let saveCounter = 0;
+        const saveIfNeeded = () => {
+            saveCounter++;
+            if (saveCounter % 10 === 0) this.saveModelToStorage();
+        };
+        window.addEventListener('beforeunload', () => this.saveModelToStorage());
+        this.addMessage = ((origAddMessage) => {
+            return (...args) => {
+                origAddMessage.apply(this, args);
+                saveIfNeeded();
+            };
+        })(this.addMessage.bind(this));
+    }
+
+    // Dynamic knowledge base expansion
+    checkForNewFact(userInput, botResponse) {
+        // Simple pattern: "Remember that ..." or "My ... is ..."
+        const rememberMatch = userInput.match(/remember that (.+)/i);
+        const myFactMatch = userInput.match(/my ([a-zA-Z ]+) is ([a-zA-Z0-9 ,.'-]+)/i);
+        if (rememberMatch) {
+            const fact = rememberMatch[1];
+            if (confirm(`Should I remember: "${fact}" for future conversations?`)) {
+                this.knowledgeBase.personal[fact] = fact;
+                alert('Got it! I will remember that.');
+            }
+        } else if (myFactMatch) {
+            const key = myFactMatch[1].trim().toLowerCase().replace(/ /g, '_');
+            const value = myFactMatch[2].trim();
+            if (confirm(`Should I remember your ${key} is "${value}"?`)) {
+                this.knowledgeBase.personal[key] = value;
+                alert('Got it! I will remember that.');
+            }
+        }
     }
 
     showTypingIndicator() {

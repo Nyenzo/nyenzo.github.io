@@ -187,6 +187,7 @@ class NyenzoChatbot {
         this.tooltipState = 0; // 0: Hi there, 1: Ask me anything
         this.bindEvents();
         this.showInitialTooltip();
+        this.startPeriodicTooltips();
     }
 
     createChatbotUI() {
@@ -245,6 +246,16 @@ class NyenzoChatbot {
         }, 2500);
     }
 
+    startPeriodicTooltips() {
+        // Show tooltips every 10 seconds when chat is closed
+        setInterval(() => {
+            if (!this.isOpen) {
+                this.tooltipState++;
+                this.showInitialTooltip();
+            }
+        }, 10000); // 10 seconds
+    }
+
     toggleChatbot() {
         const window = document.getElementById('chatbot-window');
         this.isOpen = !this.isOpen;
@@ -301,18 +312,65 @@ class NyenzoChatbot {
         // Determine response style based on conversation context
         this.responseStyle = this.determineResponseStyle(input);
 
-        // Check for different types of questions
-        if (this.isSkillQuestion(input)) {
+        // Enhanced intelligent pattern matching with context awareness
+        const intent = this.detectIntent(input);
+        
+        // Check for different types of questions with enhanced routing
+        if (intent === 'skill' || this.isSkillQuestion(input)) {
             return this.handleSkillQuestion(input);
-        } else if (this.isProjectQuestion(input)) {
+        } else if (intent === 'project' || this.isProjectQuestion(input)) {
             return this.handleProjectQuestion(input);
-        } else if (this.isPersonalQuestion(input)) {
+        } else if (intent === 'personal' || this.isPersonalQuestion(input)) {
             return this.handlePersonalQuestion(input);
-        } else if (this.isInterviewQuestion(input)) {
+        } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
             return this.handleInterviewQuestion(input);
         } else {
             return this.generateGeneralResponse(input);
         }
+    }
+
+    detectIntent(input) {
+        // Enhanced intent detection with semantic understanding
+        const patterns = {
+            // Skill and technology related
+            skill: [
+                'python', 'javascript', 'programming', 'language', 'technology', 'skill', 'expertise',
+                'machine learning', 'ai', 'data science', 'react', 'node', 'framework',
+                'certification', 'certified', 'huawei', 'alx'
+            ],
+            // Project and work related
+            project: [
+                'project', 'work', 'built', 'developed', 'created', 'aivestor', 'trading bot',
+                'pregnancy', 'maternal', 'health', 'investment', 'stock', 'advisor',
+                'tender', 'dashboard', 'bidding', 'github', 'portfolio'
+            ],
+            // Personal and experience related
+            personal: [
+                'freelance', 'freelancing', 'freelancer', 'experience', 'background', 'about',
+                'work experience', 'job', 'employment', 'career', 'professional', 'work history',
+                'who are you', 'tell me about yourself', 'your background'
+            ],
+            // Interview and professional related
+            interview: [
+                'interview', 'strength', 'weakness', 'challenge', 'motivation', 'goal',
+                'why', 'how', 'difficult', 'hardest', 'tough', 'problem',
+                'tell me about', 'describe', 'explain', 'what do you do', 'what is your'
+            ]
+        };
+
+        // Count matches for each intent
+        const intentScores = {};
+        for (const [intent, keywords] of Object.entries(patterns)) {
+            intentScores[intent] = keywords.filter(keyword => input.includes(keyword)).length;
+        }
+
+        // Return the intent with the highest score, or null if no clear match
+        const maxScore = Math.max(...Object.values(intentScores));
+        if (maxScore > 0) {
+            return Object.keys(intentScores).find(key => intentScores[key] === maxScore);
+        }
+
+        return null;
     }
 
     determineResponseStyle(input) {
@@ -332,26 +390,31 @@ class NyenzoChatbot {
     isSkillQuestion(input) {
         const skillKeywords = [
             'skill', 'technology', 'programming', 'language', 'python', 'javascript', 'react', 'node', 'machine learning', 'ai', 'data science', 'know', 'expertise', 'proficient',
-            'education', 'degree', 'university', 'study', 'school', 'college' // Added education-related keywords
+            'education', 'degree', 'university', 'study', 'school', 'college', 'certification', 'certified', 'huawei', 'alx'
         ];
         return skillKeywords.some(keyword => input.includes(keyword));
     }
 
     isProjectQuestion(input) {
-        const projectKeywords = ['project', 'aivestor', 'trading bot', 'tule initiative', 'github', 'work', 'portfolio'];
+        const projectKeywords = [
+            'project', 'aivestor', 'trading bot', 'tule initiative', 'github', 'work', 'portfolio', 'pregnancy', 'maternal', 'health', 'investment', 'stock', 'advisor', 'tender', 'dashboard', 'bidding'
+        ];
         return projectKeywords.some(keyword => input.includes(keyword));
     }
 
     isPersonalQuestion(input) {
         const personalKeywords = [
             'background', 'experience', 'about', 'who', 'contact', 'email', 'linkedin', 'your', 'you', 'yourself',
-            // Removed education-related keywords from here to avoid routing to personal fallback
+            'freelance', 'freelancing', 'freelancer', 'work experience', 'job', 'employment', 'career', 'professional', 'work history'
         ];
         return personalKeywords.some(keyword => input.includes(keyword));
     }
 
     isInterviewQuestion(input) {
-        const interviewKeywords = ['interview', 'strength', 'weakness', 'challenge', 'motivation', 'goal', 'why', 'how', 'difficult', 'hardest', 'tough', 'problem'];
+        const interviewKeywords = [
+            'interview', 'strength', 'weakness', 'challenge', 'motivation', 'goal', 'why', 'how', 'difficult', 'hardest', 'tough', 'problem',
+            'tell me about', 'describe', 'explain', 'what do you do', 'what is your', 'how do you'
+        ];
         return interviewKeywords.some(keyword => input.includes(keyword));
     }
 
@@ -397,10 +460,10 @@ class NyenzoChatbot {
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('huawei') || input.includes('ai development framework')) {
             const responses = {
-                simple: `That's a great question! I'm currently pursuing the Huawei AI Development Framework certification (Feb 2025 - Jun 2025). This covers comprehensive training in Huawei's AI development ecosystem, including their cloud AI services and frameworks for deploying machine learning models.`,
+                simple: `That's a great question! I completed the Huawei AI Development Framework certification (Feb 2025 - Jun 2025). This covered comprehensive training in Huawei's AI development ecosystem, including their cloud AI services and frameworks for deploying machine learning models.`,
                 technical: `Thank you for your question! **Huawei AI Development Framework Certification (Feb 2025 - Jun 2025)**
 
-This certification program covers:
+This certification program covered:
 • Comprehensive training in Huawei's AI development ecosystem
 • Expertise in Huawei Cloud AI services and frameworks
 • Advanced machine learning model deployment on Huawei platforms
@@ -416,8 +479,8 @@ This certification program covers:
 • Performance optimization and monitoring
 
 This certification demonstrates my commitment to staying current with enterprise AI development frameworks and cloud-based AI solutions.`,
-                casual: `That's a great question! I'm working on the Huawei AI Development Framework certification right now! It's pretty intense - learning all about Huawei's AI ecosystem and how to deploy machine learning models on their platforms. Here's a joke: Why did the AI go to therapy? Because it had too many deep issues! 🤖`,
-                conversational: `Thank you for asking! I'm currently pursuing the Huawei AI Development Framework certification (Feb 2025 - Jun 2025). This covers comprehensive training in Huawei's AI development ecosystem, including their cloud AI services and frameworks for deploying machine learning models.`
+                casual: `That's a great question! I completed the Huawei AI Development Framework certification! It was pretty intense - learned all about Huawei's AI ecosystem and how to deploy machine learning models on their platforms. Here's a joke: Why did the AI go to therapy? Because it had too many deep issues! 🤖`,
+                conversational: `Thank you for asking! I completed the Huawei AI Development Framework certification (Feb 2025 - Jun 2025). This covered comprehensive training in Huawei's AI development ecosystem, including their cloud AI services and frameworks for deploying machine learning models.`
             };
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('alx') || input.includes('software engineering')) {
@@ -454,14 +517,16 @@ This certification provided a solid foundation in modern software engineering pr
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('certification') || input.includes('certified')) {
             const responses = {
-                simple: `That's an excellent question! I have several certifications including Huawei AI Development Framework, ALX Software Engineering, AWS Solutions Architect, Google Cloud Data Engineer, Azure Data Scientist, and TensorFlow Developer. These help me stay current with AI, cloud, and software development technologies.`,
-                technical: `Thank you for your question! I hold multiple industry-recognized certifications:
+                simple: `That's an excellent question! I have certifications in Huawei AI Development Framework and ALX Software Engineering. These help me stay current with AI development and software engineering practices.`,
+                technical: `Thank you for your question! I hold industry-recognized certifications:
 
 **Huawei AI Development Framework (Feb 2025 - Jun 2025)**
 • Comprehensive training in Huawei's AI development ecosystem
 • Expertise in Huawei Cloud AI services and frameworks
 • Advanced machine learning model deployment on Huawei platforms
 • Integration of AI solutions with Huawei's enterprise infrastructure
+• Model training and optimization using Huawei's AI tools
+• Deployment strategies for production AI applications
 
 **ALX Software Engineering (Feb 2023 - Apr 2024)**
 • Intensive software engineering principles and practices
@@ -471,15 +536,9 @@ This certification provided a solid foundation in modern software engineering pr
 • DevOps practices and deployment strategies
 • Agile methodologies and project management
 
-**Additional Certifications:**
-• AWS Certified Solutions Architect (2023)
-• Google Cloud Professional Data Engineer (2023)
-• Microsoft Azure Data Scientist Associate (2022)
-• TensorFlow Developer Certificate (2022)
-
-These certifications validate my expertise across AI development, cloud architecture, data engineering, and software development. They demonstrate my commitment to staying current with industry best practices and emerging technologies.`,
-                casual: `That's a great question! I've got several certifications - Huawei AI Development Framework, ALX Software Engineering, AWS, Google Cloud, Azure, and TensorFlow. They're like badges of honor in the tech world! 🏆 Here's a joke: Why do certifications matter? Because they're like a resume's way of saying "I can actually do this stuff!" 😄`,
-                conversational: `Thank you for asking! I have several certifications including Huawei AI Development Framework, ALX Software Engineering, AWS Solutions Architect, Google Cloud Data Engineer, Azure Data Scientist, and TensorFlow Developer. These help me stay current with AI, cloud, and software development technologies and demonstrate my expertise in these areas.`
+These certifications validate my expertise in AI development and software engineering. They demonstrate my commitment to staying current with industry best practices and emerging technologies.`,
+                casual: `That's a great question! I've got certifications in Huawei AI Development Framework and ALX Software Engineering. They're like badges of honor in the tech world! 🏆 Here's a joke: Why do certifications matter? Because they're like a resume's way of saying "I can actually do this stuff!" 😄`,
+                conversational: `Thank you for asking! I have certifications in Huawei AI Development Framework and ALX Software Engineering. These help me stay current with AI development and software engineering practices and demonstrate my expertise in these areas.`
             };
             return responses[this.responseStyle] || responses.conversational;
         } else {
@@ -683,6 +742,43 @@ Each project demonstrates different aspects of my technical expertise and showca
                 technical: `Thank you for your question! You can reach me through multiple channels:\n\n**Email:** nyenzoisabwa@gmail.com\n**LinkedIn:** https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/\n**GitHub:** https://github.com/Nyenzo\n**Website:** nyenzo.github.io\n\nI'm always interested in new opportunities and collaborations. Feel free to reach out for projects, job opportunities, or just to connect!`,
                 casual: `That's a great question! Sure! You can email me at nyenzoisabwa@gmail.com, or find me on LinkedIn and GitHub. I'm always up for new opportunities and collaborations! 😊`,
                 conversational: `Thank you for asking! You can reach me through email at nyenzoisabwa@gmail.com, or connect with me on LinkedIn and GitHub. I'm always interested in new opportunities and collaborations.`
+            };
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('freelance') || input.includes('freelancing') || input.includes('freelancer')) {
+            const responses = {
+                simple: `That's a great question! I work as a freelance Data Scientist and Software Developer (Jan 2023 - Present). I've developed an AI investment advisor with over 90% accuracy and created a tender analysis dashboard for a small business. I love the flexibility and variety of freelance work!`,
+                technical: `Thank you for your question! **Freelance Experience (Jan 2023 - Present)**
+
+**Role:** Data Scientist and Software Developer
+
+**Key Projects:**
+• **AI Investment Advisor with Stock Predictor**
+  - Developed advanced stock prediction algorithms
+  - Achieved over 90% accuracy on real-world data
+  - Implemented real-time market data analysis
+  - Created AI-powered investment recommendations
+
+• **Tender Bidding Success Rate Analysis Dashboard**
+  - Collaborated with small business client
+  - Created interactive dashboard for tender analysis
+  - Provided strategic insights for business improvements
+  - Implemented data-driven decision making tools
+
+**Freelance Benefits:**
+• Flexibility to work on diverse projects
+• Exposure to multiple industries and technologies
+• Direct client interaction and requirement gathering
+• Opportunity to apply skills across different domains
+• Continuous learning through varied project requirements
+
+**Technical Skills Applied:**
+• Python for data science and ML
+• JavaScript for web development
+• Data analysis and visualization
+• Business intelligence and analytics
+• AI/ML model development and deployment`,
+                casual: `That's a great question! I've been freelancing as a Data Scientist and Software Developer since 2023. It's been awesome - I've built an AI investment advisor that's 90%+ accurate and created a dashboard for analyzing tender bidding. Freelancing gives me the freedom to work on really interesting projects! 😊`,
+                conversational: `Thank you for asking! I work as a freelance Data Scientist and Software Developer (Jan 2023 - Present). I've developed an AI investment advisor with over 90% accuracy and created a tender analysis dashboard for a small business. I enjoy the variety and flexibility that freelance work offers.`
             };
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('background') || input.includes('experience')) {

@@ -23,7 +23,17 @@ class NyenzoChatbot {
                 github: "https://github.com/Nyenzo",
                 website: "nyenzo.github.io",
                 background: "I am a dedicated Data Scientist with expertise in machine learning, data analysis, and web development. My passion lies in transforming data into actionable insights and developing robust machine learning models to address real-world challenges. I thrive in environments with minimal supervision and excel at meeting tight deadlines. Additionally, I have a keen interest in creating interactive websites and web applications.",
-                philosophy: "Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights."
+                philosophy: "Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights.",
+                hobbies: {
+                    music: "I play both piano and guitar, finding rhythm in melodies. Music flows through my daily life!",
+                    swimming: "I love swimming laps - it keeps me active and energized.",
+                    gaming: "I enjoy gaming as a way to unwind and challenge my mind.",
+                    reading: "I love diving into a good book - it's my way of exploring new worlds and ideas.",
+                    fitness: "I stay active with regular workouts and enjoy exploring new exercise routines.",
+                    writing: "I love crafting stories and creative expression through writing.",
+                    adventure: "I'm endlessly fascinated by learning new things and pushing my boundaries. I love trying new skills and exploring unfamiliar places."
+                },
+                interests: "I'm captivated by AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!"
             },
             education: {
                 degree: "Bachelor of Science in Mathematics and Computer Science",
@@ -220,7 +230,7 @@ class NyenzoChatbot {
                         <form id="chatbot-form" style="display: flex; width: 100%; gap: 12px;">
                             <textarea 
                                 id="chatbot-input" 
-                                placeholder="Type your message here..." 
+                                placeholder="Talk to me..." 
                                 rows="1"
                                 style="resize: none; overflow: hidden;"
                             ></textarea>
@@ -393,7 +403,7 @@ class NyenzoChatbot {
         const patterns = {
             skill: ['python', 'javascript', 'programming', 'language', 'technology', 'skill', 'expertise', 'machine learning', 'ai', 'data science', 'react', 'node', 'framework', 'certification', 'certified', 'huawei', 'alx'],
             project: ['project', 'work', 'built', 'developed', 'created', 'aivestor', 'trading bot', 'pregnancy', 'maternal', 'health', 'investment', 'stock', 'advisor', 'tender', 'dashboard', 'bidding', 'github', 'portfolio'],
-            personal: ['freelance', 'freelancing', 'freelancer', 'experience', 'background', 'about', 'who are you', 'tell me about yourself', 'your background', 'contact', 'email', 'linkedin', 'github'],
+            personal: ['freelance', 'freelancing', 'freelancer', 'experience', 'background', 'about', 'who are you', 'tell me about yourself', 'your background', 'contact', 'email', 'linkedin', 'github', 'hobbies', 'hobby', 'interests', 'study', 'education', 'university', 'school', 'college', 'degree'],
             interview: ['interview', 'strength', 'weakness', 'challenge', 'motivation', 'goal', 'why', 'how', 'difficult', 'hardest', 'tough', 'problem', 'tell me about', 'describe', 'explain', 'what do you do']
         };
 
@@ -424,7 +434,7 @@ class NyenzoChatbot {
     }
 
     isPersonalQuestion(input) {
-        const personalKeywords = ['background', 'experience', 'about', 'who', 'contact', 'email', 'reach', 'your', 'you', 'yourself', 'freelance', 'freelancing', 'freelancer', 'work experience', 'job', 'employment', 'career', 'professional', 'work history'];
+        const personalKeywords = ['background', 'experience', 'about', 'who', 'contact', 'email', 'reach', 'your', 'you', 'yourself', 'freelance', 'freelancing', 'freelancer', 'work experience', 'job', 'employment', 'career', 'professional', 'work history', 'hobbies', 'hobby', 'interests', 'study', 'education', 'university', 'school', 'college', 'degree'];
         return personalKeywords.some(keyword => input.includes(keyword));
     }
 
@@ -502,7 +512,148 @@ class NyenzoChatbot {
         }
     }
 
-    // ... (other handlers like handleProjectQuestion, handlePersonalQuestion, handleInterviewQuestion remain unchanged for brevity)
+    handlePersonalQuestion(input) {
+        const personalInfo = this.knowledgeBase.personal;
+        const educationInfo = this.knowledgeBase.education;
+        
+        if (input.includes('hobbies') || input.includes('hobby')) {
+            const responses = {
+                simple: `I have a diverse range of interests! I love music, swimming, gaming, reading, fitness, writing, and adventure. It keeps me balanced and curious about new experiences!`,
+                technical: `I have a rich array of interests. I play both piano and guitar, finding rhythm in melodies. I love swimming laps - it keeps me active and energized. I enjoy gaming as a way to unwind and challenge my mind. I love diving into a good book - it's my way of exploring new worlds and ideas. I stay active with regular workouts and enjoy exploring new exercise routines. I love crafting stories and creative expression through writing. I'm endlessly fascinated by learning new things and pushing my boundaries. I love trying new skills and exploring unfamiliar places.`,
+                casual: `I've got a lot of interests! I love music, swimming, gaming, reading, fitness, writing, and adventure. It's like a mini-me of my personality! 😊`,
+                conversational: `I have a diverse range of interests. I play both piano and guitar, finding rhythm in melodies. I love swimming laps - it keeps me active and energized. I enjoy gaming as a way to unwind and challenge my mind. I love diving into a good book - it's my way of exploring new worlds and ideas. I stay active with regular workouts and enjoy exploring new exercise routines. I love crafting stories and creative expression through writing. I'm endlessly fascinated by learning new things and pushing my boundaries. I love trying new skills and exploring unfamiliar places.`
+            };
+            this.followUpQuestion = "What's your favorite hobby?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('interests')) {
+            const responses = {
+                simple: `I'm captivated by AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`,
+                technical: `I'm captivated by AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`,
+                casual: `I'm captivated by AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`,
+                conversational: `I'm captivated by AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`
+            };
+            this.followUpQuestion = "What's your favorite topic?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('study') || input.includes('education') || input.includes('university') || input.includes('school') || input.includes('college') || input.includes('degree')) {
+            const responses = {
+                simple: `I studied at JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY, where I'm pursuing a Bachelor of Science in Mathematics and Computer Science from Sep 2018 to May 2025. My focus is on Mathematics, Computer Science, Data Analysis, and Machine Learning.`,
+                technical: `I'm currently pursuing a Bachelor of Science in Mathematics and Computer Science at JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY (Sep 2018 - May 2025). My academic focus includes Mathematics, Computer Science, Data Analysis, and Machine Learning. I've achieved academic excellence and conducted research on pregnancy outcomes prediction.`,
+                casual: `I'm at JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY studying Mathematics and Computer Science! Been there since 2018 and graduating in 2025. I love the mix of math and computer science - it's perfect for data science! 😊`,
+                conversational: `I'm studying at JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY, pursuing a Bachelor of Science in Mathematics and Computer Science from Sep 2018 to May 2025. My focus is on Mathematics, Computer Science, Data Analysis, and Machine Learning.`
+            };
+            this.followUpQuestion = "What's your favorite subject?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('background')) {
+            const responses = {
+                simple: `I am a dedicated Data Scientist with expertise in machine learning, data analysis, and web development. My passion lies in transforming data into actionable insights and developing robust machine learning models to address real-world challenges. I thrive in environments with minimal supervision and excel at meeting tight deadlines. Additionally, I have a keen interest in creating interactive websites and web applications.`,
+                technical: `I am a dedicated Data Scientist with expertise in machine learning, data analysis, and web development. My passion lies in transforming data into actionable insights and developing robust machine learning models to address real-world challenges. I thrive in environments with minimal supervision and excel at meeting tight deadlines. Additionally, I have a keen interest in creating interactive websites and web applications.`,
+                casual: `I am a dedicated Data Scientist with expertise in machine learning, data analysis, and web development. My passion lies in transforming data into actionable insights and developing robust machine learning models to address real-world challenges. I thrive in environments with minimal supervision and excel at meeting tight deadlines. Additionally, I have a keen interest in creating interactive websites and web applications.`,
+                conversational: `I am a dedicated Data Scientist with expertise in machine learning, data analysis, and web development. My passion lies in transforming data into actionable insights and developing robust machine learning models to address real-world challenges. I thrive in environments with minimal supervision and excel at meeting tight deadlines. Additionally, I have a keen interest in creating interactive websites and web applications.`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('philosophy')) {
+            const responses = {
+                simple: `Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights.`,
+                technical: `Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights.`,
+                casual: `Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights.`,
+                conversational: `Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights.`
+            };
+            this.followUpQuestion = "What's your favorite book?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else {
+            const responses = {
+                simple: `I'm a Data Scientist passionate about machine learning, data analysis, and web development. I'm always learning new things and eager to share my knowledge!`,
+                technical: `I'm a Data Scientist passionate about machine learning, data analysis, and web development. I'm always learning new things and eager to share my knowledge!`,
+                casual: `I'm a Data Scientist passionate about machine learning, data analysis, and web development. I'm always learning new things and eager to share my knowledge!`,
+                conversational: `I'm a Data Scientist passionate about machine learning, data analysis, and web development. I'm always learning new things and eager to share my knowledge!`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        }
+    }
+
+    handleProjectQuestion(input) {
+        const projects = this.knowledgeBase.projects;
+        if (input.includes('pregnancy')) {
+            const responses = {
+                simple: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`,
+                technical: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`,
+                casual: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`,
+                conversational: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('aivestor')) {
+            const responses = {
+                simple: `I developed an AI investment advisor featuring an advanced stock predictor. This project aimed to provide real-time market data analysis and AI-powered investment recommendations to help users make informed decisions in the stock market.`,
+                technical: `I developed an AI investment advisor featuring an advanced stock predictor. This project aimed to provide real-time market data analysis and AI-powered investment recommendations to help users make informed decisions in the stock market.`,
+                casual: `I developed an AI investment advisor featuring an advanced stock predictor. This project aimed to provide real-time market data analysis and AI-powered investment recommendations to help users make informed decisions in the stock market.`,
+                conversational: `I developed an AI investment advisor featuring an advanced stock predictor. This project aimed to provide real-time market data analysis and AI-powered investment recommendations to help users make informed decisions in the stock market.`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('tender')) {
+            const responses = {
+                simple: `I created a dashboard for analyzing tender bidding success rates. This tool helped businesses and organizations track their success rates and identify areas for strategic improvements in tender bidding.`,
+                technical: `I created a dashboard for analyzing tender bidding success rates. This tool helped businesses and organizations track their success rates and identify areas for strategic improvements in tender bidding.`,
+                casual: `I created a dashboard for analyzing tender bidding success rates. This tool helped businesses and organizations track their success rates and identify areas for strategic improvements in tender bidding.`,
+                conversational: `I created a dashboard for analyzing tender bidding success rates. This tool helped businesses and organizations track their success rates and identify areas for strategic improvements in tender bidding.`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else {
+            const responses = {
+                simple: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`,
+                technical: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`,
+                casual: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`,
+                conversational: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        }
+    }
+
+    handleInterviewQuestion(input) {
+        const interviewInfo = this.knowledgeBase.interview;
+        if (input.includes('strengths')) {
+            const responses = {
+                simple: `I have a strong foundation in data science and software engineering. I'm proficient in Python, JavaScript, and various ML frameworks. I'm also skilled in web development and database management. I'm passionate about building robust and scalable systems.`,
+                technical: `I have a strong foundation in data science and software engineering. I'm proficient in Python, JavaScript, and various ML frameworks. I'm also skilled in web development and database management. I'm passionate about building robust and scalable systems.`,
+                casual: `I have a strong foundation in data science and software engineering. I'm proficient in Python, JavaScript, and various ML frameworks. I'm also skilled in web development and database management. I'm passionate about building robust and scalable systems.`,
+                conversational: `I have a strong foundation in data science and software engineering. I'm proficient in Python, JavaScript, and various ML frameworks. I'm also skilled in web development and database management. I'm passionate about building robust and scalable systems.`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('motivation')) {
+            const responses = {
+                simple: `I'm motivated by the opportunity to create innovative solutions that solve real-world problems. I'm passionate about advancing AI and machine learning applications, contributing to open-source projects, and mentoring the next generation of developers.`,
+                technical: `I'm motivated by the opportunity to create innovative solutions that solve real-world problems. I'm passionate about advancing AI and machine learning applications, contributing to open-source projects, and mentoring the next generation of developers.`,
+                casual: `I'm motivated by the opportunity to create innovative solutions that solve real-world problems. I'm passionate about advancing AI and machine learning applications, contributing to open-source projects, and mentoring the next generation of developers.`,
+                conversational: `I'm motivated by the opportunity to create innovative solutions that solve real-world problems. I'm passionate about advancing AI and machine learning applications, contributing to open-source projects, and mentoring the next generation of developers.`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('goals')) {
+            const responses = {
+                simple: `My goal is to advance AI and machine learning applications, develop scalable web solutions, and contribute to open-source projects. I'm passionate about mentoring and knowledge sharing in the tech community and leading innovative technology projects.`,
+                technical: `My goal is to advance AI and machine learning applications, develop scalable web solutions, and contribute to open-source projects. I'm passionate about mentoring and knowledge sharing in the tech community and leading innovative technology projects.`,
+                casual: `My goal is to advance AI and machine learning applications, develop scalable web solutions, and contribute to open-source projects. I'm passionate about mentoring and knowledge sharing in the tech community and leading innovative technology projects.`,
+                conversational: `My goal is to advance AI and machine learning applications, develop scalable web solutions, and contribute to open-source projects. I'm passionate about mentoring and knowledge sharing in the tech community and leading innovative technology projects.`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        } else {
+            const responses = {
+                simple: `I'm passionate about AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`,
+                technical: `I'm passionate about AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`,
+                casual: `I'm passionate about AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`,
+                conversational: `I'm passionate about AI's rapid evolution and love having meaningful conversations with interesting people. I embrace spontaneity and meaningful connections - life's too short for surface-level interactions!`
+            };
+            this.followUpQuestion = "What's your favorite programming language?";
+            return responses[this.responseStyle] || responses.conversational;
+        }
+    }
 
     generateGeneralResponse(input) {
         const lastInput = this.conversationHistory.length > 0 ? this.conversationHistory[this.conversationHistory.length - 1].user.toLowerCase() : '';

@@ -263,7 +263,7 @@ class NyenzoChatbot {
         tooltip.innerText = this.tooltipState % 2 === 0 ? 'Hi there 👋' : 'Ask me anything';
         tooltip.style.position = 'absolute';
         tooltip.style.right = '60px';
-        tooltip.style.bottom = '8px';
+        tooltip.style.top = '-50px';
         tooltip.style.background = '#2d3748';
         tooltip.style.color = '#fff';
         tooltip.style.padding = '8px 16px';

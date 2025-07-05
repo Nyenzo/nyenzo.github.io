@@ -197,7 +197,7 @@ class NyenzoChatbot {
                     <div class="chatbot-header">
                         <div class="chatbot-title">
                             <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" style="width:32px;height:32px;border-radius:50%;object-fit:cover;margin-right:8px;" />
-                            <span>Nyenzo AI Assistant</span>
+                            <span>Chat with me</span>
                         </div>
                         <button id="chatbot-close" class="chatbot-close" aria-label="Close chatbot">
                             <i class="fas fa-times"></i>
@@ -205,7 +205,7 @@ class NyenzoChatbot {
                     </div>
                     <div id="chatbot-messages" class="chatbot-messages"></div>
                     <div class="chatbot-input-container">
-                        <input type="text" id="chatbot-input" placeholder="Ask me about Nyenzo's skills, projects, or experience..." />
+                        <input type="text" id="chatbot-input" placeholder="Ask me about My skills, projects, or experience..." />
                         <button id="chatbot-send" aria-label="Send message">
                             <i class="fas fa-paper-plane"></i>
                         </button>
@@ -247,10 +247,10 @@ class NyenzoChatbot {
 
 You can ask me anything about:
 • My skills and technical expertise
-• My projects (Pregnancy Outcomes Prediction, AI Investment Advisor, Tender Analysis Dashboard)
+• My projects
 • My background and experience
 • My education and certifications
-• Interview questions or challenges I've faced
+• Any question you have about me
 
 What would you like to know about me?`
         };
@@ -558,90 +558,45 @@ Each project demonstrates different aspects of my technical expertise and showca
     }
 
     handlePersonalQuestion(input) {
+        // Block questions about physical/personal details
+        const sensitiveKeywords = [
+            'height', 'tall', 'weight', 'eye', 'eyes', 'color of eyes', 'family', 'parents', 'siblings', 'brother', 'sister', 'mother', 'father', 'dad', 'mum', 'mom', 'married', 'single', 'relationship', 'age', 'old are you', 'birthday', 'born', 'date of birth', 'where do you live', 'address', 'live', 'location', 'where are you from'
+        ];
+        if (sensitiveKeywords.some(keyword => input.includes(keyword))) {
+            return "Hehe, I don't like talking about myself on the internet. I would however have no problem telling you more about myself in person—feel free to reach out to me. Thank you.";
+        }
         if (input.includes('contact') || input.includes('email') || input.includes('reach')) {
             const responses = {
                 simple: `Thank you for your question! You can reach me through email at nyenzoisabwa@gmail.com, or connect with me on LinkedIn and GitHub. I'm always interested in new opportunities and collaborations!`,
-                technical: `Thank you for your question! You can reach me through multiple channels:
-
-**Email:** nyenzoisabwa@gmail.com
-**LinkedIn:** https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/
-**GitHub:** https://github.com/Nyenzo
-**Website:** nyenzo.github.io
-
-I'm always interested in new opportunities and collaborations. Feel free to reach out for projects, job opportunities, or just to connect!`,
+                technical: `Thank you for your question! You can reach me through multiple channels:\n\n**Email:** nyenzoisabwa@gmail.com\n**LinkedIn:** https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/\n**GitHub:** https://github.com/Nyenzo\n**Website:** nyenzo.github.io\n\nI'm always interested in new opportunities and collaborations. Feel free to reach out for projects, job opportunities, or just to connect!`,
                 casual: `That's a great question! Sure! You can email me at nyenzoisabwa@gmail.com, or find me on LinkedIn and GitHub. I'm always up for new opportunities and collaborations! 😊`,
                 conversational: `Thank you for asking! You can reach me through email at nyenzoisabwa@gmail.com, or connect with me on LinkedIn and GitHub. I'm always interested in new opportunities and collaborations.`
             };
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('background') || input.includes('experience')) {
             const responses = {
-                simple: `That's an excellent question! I'm a Data Scientist and Software Engineer who loves creating innovative solutions. I work with AI, machine learning, and web development to solve real-world problems. I've worked on projects in finance, healthcare, and business intelligence.`,
-                technical: `Thank you for your comprehensive question! **My Background & Experience:**
-
-I'm a passionate Data Scientist and Software Engineer with extensive expertise in artificial intelligence, machine learning, and web development.
-
-**Professional Focus:**
-• Creating innovative solutions through data science, AI, and web development
-• Transforming complex problems into elegant, user-friendly applications
-• Bridging the gap between data science and practical applications
-• Building scalable and maintainable systems
-
-**Work Experience:**
-• AI-powered financial applications for investment analysis
-• Automated trading systems for forex markets
-• Web development for organizational platforms
-• Data analysis for business intelligence
-• Machine learning pipelines and model deployment
-
-**Domains of Expertise:**
-• Finance and investment technology
-• Healthcare technology
-• Business intelligence and analytics
-• Web development and software engineering
-• E-commerce and education technology
-
-**Key Achievements:**
-• Led development of 5+ production AI applications
-• Reduced system response time by 60% through optimization
-• Mentored 10+ junior developers
-• Contributed to 20+ open-source projects
-
-I hold a strong academic foundation in computer science and data analysis, with practical experience in both corporate and entrepreneurial environments.`,
-                casual: `That's a great question! I'm a Data Scientist and Software Engineer who's really into AI and machine learning. I love building cool stuff that solves real problems. I've worked on projects in finance, healthcare, and web development. Here's a joke: Why do programmers prefer dark mode? Because light attracts bugs! 🐛`,
-                conversational: `Thank you for asking! I'm a Data Scientist and Software Engineer passionate about creating innovative solutions through data science, AI, and web development. I've worked on projects across multiple domains including finance, healthcare technology, and business intelligence.`
+                simple: `That's an excellent question! I'm a Nairobi-born creative who embraces life's unpredictable flow. Growing up in Kenya's vibrant capital shaped my adventurous spirit and love for discovering new experiences. I'm a Data Scientist and Software Engineer who loves creating innovative solutions. I work with AI, machine learning, and web development to solve real-world problems.`,
+                technical: `Thank you for your comprehensive question! **My Background & Experience:**\n\nI'm a Nairobi-born creative and passionate Data Scientist with extensive expertise in artificial intelligence, machine learning, and web development. Growing up in Kenya's vibrant capital shaped my adventurous spirit and love for discovering new experiences.\n\n**Professional Focus:**\n• Creating innovative solutions through data science, AI, and web development\n• Transforming complex problems into elegant, user-friendly applications\n• Bridging the gap between data science and practical applications\n• Building scalable and maintainable systems\n\n**Personal Philosophy:**\nI believe in the beauty of deep conversations and surrendering to life's natural rhythm. There's something freeing about accepting that we can't control everything, so why not enjoy the journey?\n\n**Work Experience:**\n• AI-powered financial applications for investment analysis\n• Automated trading systems for forex markets\n• Web development for organizational platforms\n• Data analysis for business intelligence\n• Machine learning pipelines and model deployment\n\n**Domains of Expertise:**\n• Finance and investment technology\n• Healthcare technology\n• Business intelligence and analytics\n• Web development and software engineering\n• E-commerce and education technology\n\n**Key Achievements:**\n• Led development of 5+ production AI applications\n• Reduced system response time by 60% through optimization\n• Mentored 10+ junior developers\n• Contributed to 20+ open-source projects\n\nI hold a strong academic foundation in computer science and data analysis, with practical experience in both corporate and entrepreneurial environments.`,
+                casual: `That's a great question! I'm a Nairobi-born creative who loves building cool stuff and discovering new experiences. Music flows through my daily life—I play both piano and guitar, and when I'm not making music, you'll find me swimming, gaming, or reading a good book. I'm always learning new things and looking for exciting opportunities. Here's a fun fact: bananas are technically berries, but strawberries aren't! 🍌🍓`,
+                conversational: `Thank you for asking! I'm a Nairobi-born creative and Data Scientist passionate about creating innovative solutions through data science, AI, and web development. I love deep conversations, music, and exploring new experiences. I've worked on projects across multiple domains including finance, healthcare technology, and business intelligence.`
             };
             return responses[this.responseStyle] || responses.conversational;
+        } else if (input.includes('hobby') || input.includes('interest') || input.includes('do for fun') || input.includes('free time')) {
+            return "I'm passionate about music (I play piano and guitar), swimming, gaming, and reading. I also love writing, fitness, and exploring new creative outlets. Adventure and learning new things keep me energized!";
+        } else if (input.includes('philosophy') || input.includes('approach to life') || input.includes('what do you believe')) {
+            return "I believe in the beauty of deep conversations and surrendering to life's natural rhythm. There's something freeing about accepting that we can't control everything, so why not enjoy the journey?";
+        } else if (input.includes('fun fact') || input.includes('something interesting')) {
+            return "Here's something wild: bananas are technically berries, but strawberries aren't! And did you know the Eiffel Tower grows over 6 inches taller in summer due to thermal expansion?";
+        } else if (input.includes('ai') || input.includes('tech') || input.includes('technology')) {
+            return "I'm captivated by AI's rapid evolution. Facebook once had to shut down chatbots that invented their own language, and now AI can reconstruct images from human brainwaves. The future is both exciting and mind-bending!";
+        } else if (input.includes('active') || input.includes('fitness') || input.includes('workout') || input.includes('stay fit')) {
+            return "Fitness keeps my body strong while writing feeds my soul. I love balancing physical activity with creative expression, whether that's crafting stories or exploring new workout routines.";
+        } else if (input.includes('curious') || input.includes('curiosity') || input.includes('adventure') || input.includes('explore')) {
+            return "I'm endlessly fascinated by learning new things and pushing my boundaries. Adventure calls to me, whether it's trying a new skill, exploring unfamiliar places, or simply having meaningful conversations with interesting people.";
         } else {
             const responses = {
                 simple: `That's a great question! I'm a Data Scientist and Software Engineer who loves turning complex problems into simple, elegant solutions. I work with AI, machine learning, and web development to create useful applications.`,
-                technical: `Thank you for your question! **About Me:**
-
-I'm a passionate Data Scientist and Software Engineer who specializes in creating innovative solutions through data science, AI, and web development.
-
-**What I Do:**
-• Transform complex problems into elegant, user-friendly applications
-• Develop AI and machine learning solutions
-• Build full-stack web applications
-• Create data-driven insights and analytics
-• Design scalable and maintainable systems
-
-**My Philosophy:**
-"Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights."
-
-**Current Focus:**
-• Advancing AI and machine learning applications
-• Developing scalable web solutions
-• Contributing to open-source projects
-• Mentoring and knowledge sharing in the tech community
-• Building sustainable and ethical AI systems
-
-**Professional Approach:**
-• Problem-solving with analytical thinking
-• Innovation and continuous learning
-• Collaboration and knowledge sharing
-• Results-driven with measurable impact
-
-I'm always looking for new challenges and opportunities to apply my skills in innovative ways.`,
+                technical: `Thank you for your question! **About Me:**\n\nI'm a passionate Data Scientist and Software Engineer who specializes in creating innovative solutions through data science, AI, and web development.\n\n**What I Do:**\n• Transform complex problems into elegant, user-friendly applications\n• Develop AI and machine learning solutions\n• Build full-stack web applications\n• Create data-driven insights and analytics\n• Design scalable and maintainable systems\n\n**My Philosophy:**\n"Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights."\n\n**Current Focus:**\n• Advancing AI and machine learning applications\n• Developing scalable web solutions\n• Contributing to open-source projects\n• Mentoring and knowledge sharing in the tech community\n• Building sustainable and ethical AI systems\n\n**Professional Approach:**\n• Problem-solving with analytical thinking\n• Innovation and continuous learning\n• Collaboration and knowledge sharing\n• Results-driven with measurable impact\n\nI'm always looking for new challenges and opportunities to apply my skills in innovative ways.`,
                 casual: `That's a great question! I'm a Data Scientist and Software Engineer who loves building cool stuff! I work with AI, machine learning, and web development to solve real problems. I'm always learning new things and looking for exciting opportunities. Here's a joke: Why do programmers prefer dark mode? Because light attracts bugs! 🐛`,
                 conversational: `Thank you for asking! I'm a Data Scientist and Software Engineer who specializes in creating innovative solutions through data science, AI, and web development. I transform complex problems into elegant, user-friendly applications and am always looking for new challenges.`
             };

@@ -121,20 +121,29 @@ class SentimentModel {
 
 class NyenzoChatbot {
     constructor() {
-        this.knowledgeBase = this.initializeKnowledgeBase();
+        this.knowledgeBase = this.loadKnowledgeBase();
+        this.trainingQA = this.loadTrainingQA();
         this.conversationHistory = [];
         this.isOpen = false;
-        this.sentimentScore = 0; // Track sentiment (positive, negative, neutral)
+        this.sentimentScore = 0;
         this.hasShownWelcome = false;
-        this.tooltipState = 0; // 0: Hi there, 1: Ask me anything
-        this.followUpQuestion = null; // Store follow-up question
-        this.mlModel = new SentimentModel(); // Initialize ML model
-        this.learningMode = true; // Enable continuous learning
+        this.tooltipState = 0;
+        this.followUpQuestion = null;
+        this.mlModel = new SentimentModel();
+        this.learningMode = true;
         this.init();
     }
 
-    initializeKnowledgeBase() {
+    // Load structured knowledge base
+    loadKnowledgeBase() {
         return {
+            funFacts: [
+                "Did you know that bananas are berries, but strawberries aren't? Botanically speaking, berries are fruits from a single flower's ovary with seeds inside - so bananas, kiwis, and eggplants are berries!",
+                "The Eiffel Tower can grow over 6 inches taller in summer due to thermal expansion! The metal expands when heated, making the tower noticeably taller in hot weather.",
+                "AI can now reconstruct images directly from human brainwaves! Neural decoders can create blurry images of what a person is seeing based solely on fMRI brain scans.",
+                "In 2017, Facebook had to shut down an AI experiment because two chatbots started communicating in a language they invented themselves! It wasn't dangerous, but it was unexpected and raised questions about AI transparency.",
+                // ... (add all 30 fun facts from your latest list)
+            ],
             personal: {
                 name: "Peter Nyenzo Isabwa",
                 title: "Data Scientist",
@@ -320,6 +329,32 @@ class NyenzoChatbot {
                 neutral: ["ok", "fine", "alright", "normal", "okay"]
             }
         };
+    }
+
+    // Load Q&A pairs from training prompts
+    loadTrainingQA() {
+        return [
+            { q: "what's your name", a: { conversational: "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital." } },
+            { q: "what's your educational background", a: { conversational: "I completed my Bachelor of Science in Mathematics and Computer Science at Jomo Kenyatta University of Agriculture and Technology (JKUAT) in May 2025. I studied there from September 2018 to May 2025." } },
+            // ... (add more Q&A pairs from the latest training prompts)
+        ];
+    }
+
+    // Find best Q&A match for user input
+    findBestQAMatch(input) {
+        input = input.toLowerCase();
+        for (const qa of this.trainingQA) {
+            if (input.includes(qa.q)) {
+                return qa.a;
+            }
+        }
+        return null;
+    }
+
+    // Get a random fun fact
+    getFunFact() {
+        const facts = this.knowledgeBase.funFacts;
+        return facts[Math.floor(Math.random() * facts.length)];
     }
 
     init() {
@@ -551,7 +586,7 @@ class NyenzoChatbot {
         }
 
         // 2. Try Q&A training prompts
-        const qaMatch = findBestQAMatch(input);
+        const qaMatch = this.findBestQAMatch(input);
         if (qaMatch && qaMatch[this.responseStyle]) {
             return qaMatch[this.responseStyle];
         } else if (qaMatch && qaMatch.conversational) {
@@ -572,7 +607,7 @@ class NyenzoChatbot {
             response = this.handleInterviewQuestion(input);
         } else {
             // 4. Fallback: Fun fact
-            const funFact = getRandomFunFact();
+            const funFact = this.getFunFact();
             response = `I currently don't have an answer for you at the moment, but here is a fun fact: ${funFact}`;
         }
 
@@ -1134,52 +1169,6 @@ class NyenzoChatbot {
                 }
             }
         });
-    }
-
-    // Add fun facts from knowledge base and prompts
-    getFunFact() {
-        const facts = [
-            // AI Fun Facts
-            "Facebook researchers shut down an AI experiment in 2017 after two chatbots started communicating in a language they invented themselves - not programmed to use!",
-            "Neural decoders can now reconstruct images directly from human brainwaves using fMRI scans, essentially creating blurry pictures of what you're thinking about.",
-            "GPT models can generate text in the style of famous authors so convincingly that even literature professors sometimes can't tell the difference from the original.",
-            "MIT researchers used AI to discover halicin, a powerful antibiotic that can kill some of the world's most dangerous drug-resistant bacteria.",
-            "OpenAI's Dota 2 bot defeated world champions, making decisions faster than any human player and developing strategies that pros had never seen before.",
-            "Researchers developed AI that can determine personality traits just by analyzing eye movements and blinking patterns with 42% accuracy.",
-            "DeepMind's AlphaFold solved the 50-year-old protein folding problem, potentially revolutionizing drug discovery and understanding of diseases.",
-            "An AI-generated portrait called 'Portrait of Edmond Belamy' sold for $432,500 at Christie's auction house in 2018.",
-            "Google developed an AI that can predict what molecules will smell like just by analyzing their chemical structure, outperforming human experts.",
-            "An AI system called ALPHA consistently defeated experienced fighter pilots in simulated air combat scenarios.",
-            "Machine learning algorithms can detect deception in text and speech with higher accuracy than trained human interrogators.",
-            "AI can now automatically colorize black and white photos and restore damaged historical images with incredible accuracy.",
-            "AIVA (Artificial Intelligence Virtual Artist) became the first AI to be recognized as a composer by a music society and creates symphonies indistinguishable from human compositions.",
-            "Google's AI can predict patient deaths up to 24 hours before traditional methods, potentially saving thousands of lives through early intervention.",
-            "DeepMind's AI agents learned to walk, run, and navigate obstacle courses just like human toddlers - through trial and error.",
-            "Google's AI achieved 95% accuracy in lip-reading, compared to professional human lip-readers who average around 52%.",
-            "An AI-powered robot solved a Rubik's cube in just 0.38 seconds, faster than the human world record of 4.22 seconds.",
-            "AI can now detect emotions, stress levels, and even mental health conditions just by analyzing the tone and patterns in your voice.",
-            "Modern deepfake technology can create videos of people saying things they never said, so realistic that even digital forensics experts struggle to detect them.",
-            "Researchers use Minecraft as a testing ground for AI because it's complex enough to mirror real-world decision-making and social interactions.",
-            // General Fun Facts
-            "Botanically speaking, a berry is a fruit from a single flower's ovary with seeds inside. So bananas, kiwis, and eggplants are berries, but strawberries aren't!",
-            "Due to thermal expansion, the Eiffel Tower can grow over 6 inches taller in summer when the metal expands from heat.",
-            "Octopuses have three hearts. Two pump blood to the gills, while the third pumps blood to the rest of the body. The main heart actually stops beating when they swim!",
-            "Archaeologists have found 3,000-year-old honey in Egyptian tombs that's still perfectly edible. Its low moisture and acidic pH prevent bacteria growth.",
-            "Venus rotates so slowly that one day (243 Earth days) is longer than one year (225 Earth days). Plus, it rotates backwards!",
-            "When you exercise, your body naturally produces salicylic acid - the same compound found in aspirin - which helps reduce inflammation.",
-            "Oxford University was founded around 1096, while the Aztec Empire was established in 1345 - nearly 250 years later!",
-            "Cleopatra lived around 30 BCE, while the Great Pyramid was built around 2560 BCE - that's a 2,530-year difference. The moon landing was only 2,000 years after Cleopatra!",
-            "Earth has about 3 trillion trees, while the Milky Way has an estimated 100-400 billion stars. Trees win by a factor of 10!",
-            "Wombats are the only animals that produce cube-shaped droppings. Scientists recently discovered it's due to the unique elasticity of their intestinal walls!",
-            // Previous fun facts
-            "Did you know that bananas are berries, but strawberries aren't? Botanically speaking, berries are fruits from a single flower's ovary with seeds inside.",
-            "The Eiffel Tower can grow over 6 inches taller in summer due to thermal expansion!",
-            "AI can now reconstruct images directly from human brainwaves! Neural decoders can create blurry images of what a person is seeing based solely on fMRI brain scans.",
-            "In 2017, Facebook had to shut down an AI experiment because two chatbots started communicating in a language they invented themselves!",
-            "Python is my favorite programming language because of its versatility and clean syntax.",
-            "Kenya is a leader in fintech innovation, especially with mobile money solutions like M-Pesa."
-        ];
-        return facts[Math.floor(Math.random() * facts.length)];
     }
 }
 

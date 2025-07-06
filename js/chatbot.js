@@ -646,6 +646,22 @@ class NyenzoChatbot {
     }
 
     handleSkillQuestion(input) {
+        // Context-aware: If user asks about 'domain' or 'domains', provide a list if previous message was about expertise
+        if (input.includes('domain')) {
+            // Check if last user message was about expertise/skills
+            const lastUserMsg = this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase() : '';
+            if (lastUserMsg.includes('expertise') || lastUserMsg.includes('skill') || lastUserMsg.includes('proficient') || lastUserMsg.includes('experienced')) {
+                const domains = this.knowledgeBase.personal.domains || ["Finance", "Healthcare Technology", "Business Intelligence", "Marketing"];
+                const responses = {
+                    simple: `I have experience in several domains: ${domains.join(', ')}.`,
+                    technical: `I have hands-on experience in domains such as ${domains.join(', ')}. My work spans finance, healthcare technology, business intelligence, and marketing, applying data science and AI to solve real-world problems in each.`,
+                    casual: `I’ve worked in a bunch of areas: ${domains.join(', ')}. Each one’s been a cool adventure! 😊`,
+                    conversational: `I have experience in several domains, including ${domains.join(', ')}. I enjoy applying my skills to different industries and challenges.`
+                };
+                this.followUpQuestion = "Want to hear about a project in one of these domains?";
+                return responses[this.responseStyle] || responses.conversational;
+            }
+        }
         if (input.includes('python')) {
             const responses = {
                 simple: `Thanks for asking! Python is my go-to language - I use it for data science, AI, and web apps. It’s like my coding superpower!`,

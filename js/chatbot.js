@@ -380,6 +380,9 @@ class NyenzoChatbot {
     }
 
     showInitialTooltip() {
+        // Prevent tooltip if bot is open or welcome not shown
+        if (this.isOpen && !this.hasShownWelcome) return;
+        if (this.isOpen) return;
         const toggleBtn = document.getElementById('chatbot-toggle');
         if (!toggleBtn) return;
         let tooltip = document.createElement('div');
@@ -418,6 +421,11 @@ class NyenzoChatbot {
         const window = document.getElementById('chatbot-window');
         this.isOpen = !this.isOpen;
         window.style.display = this.isOpen ? 'flex' : 'none';
+        // Hide tooltip immediately if opening bot
+        if (this.isOpen) {
+            const tooltip = document.getElementById('chatbot-tooltip');
+            if (tooltip) tooltip.remove();
+        }
         if (this.isOpen && !this.hasShownWelcome) {
             this.loadWelcomeMessage();
             this.hasShownWelcome = true;
@@ -435,9 +443,10 @@ class NyenzoChatbot {
 
     loadWelcomeMessage() {
         if (this.hasShownWelcome) return;
-        
+        // Hide tooltip if visible
+        const tooltip = document.getElementById('chatbot-tooltip');
+        if (tooltip) tooltip.remove();
         this.showTypingIndicator();
-        
         setTimeout(() => {
             this.hideTypingIndicator();
             const welcomeMessage = {
@@ -445,9 +454,10 @@ class NyenzoChatbot {
                 content: `Hi! I'm Peter Nyenzo Isabwa. 👋 I'm a Data Scientist passionate about machine learning, data analysis, and web development. \n\nYou can ask me anything about:\n• My skills and technical expertise\n• My projects\n• My background and experience\n• My education and certifications\n• Any question you have about me\n\nWhat would you like to know about me?`
             };
             this.addMessage(welcomeMessage);
+            // Resume tooltips after welcome message
+            setTimeout(() => { this.hasShownWelcome = true; }, 100);
         }, 1000);
-        
-        this.hasShownWelcome = true;
+        // Don't set hasShownWelcome yet; do it after message
     }
 
     handleUserInput() {

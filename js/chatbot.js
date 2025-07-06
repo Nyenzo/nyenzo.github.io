@@ -855,6 +855,8 @@ class NyenzoChatbot {
 
         const contentElem = document.createElement('div');
         contentElem.className = 'message-content ' + (message.type === 'user' ? 'right' : 'left');
+        contentElem.style.flexDirection = 'column'; // Ensure vertical stacking
+        contentElem.style.alignItems = 'center';
 
         if (message.type === 'bot') {
             const bubble = document.createElement('div');
@@ -862,29 +864,37 @@ class NyenzoChatbot {
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
             contentElem.appendChild(bubble);
 
-            // Add feedback buttons
+            // Add feedback buttons BELOW the bubble
             const feedbackContainer = document.createElement('div');
             feedbackContainer.style.display = 'flex';
             feedbackContainer.style.gap = '8px';
-            feedbackContainer.style.marginTop = '4px';
+            feedbackContainer.style.marginTop = '0px';
+            feedbackContainer.style.marginBottom = '2px';
+            feedbackContainer.style.justifyContent = 'center';
             feedbackContainer.innerHTML = `
                 <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful">👍</button>
                 <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful">👎</button>
             `;
             contentElem.appendChild(feedbackContainer);
+
+            // Timestamp BELOW feedback
+            const timestampElem = document.createElement('div');
+            timestampElem.className = 'message-timestamp';
+            const now = new Date();
+            timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            contentElem.appendChild(timestampElem);
         } else {
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
             contentElem.appendChild(bubble);
+            // Timestamp for user message
+            const timestampElem = document.createElement('div');
+            timestampElem.className = 'message-timestamp';
+            const now = new Date();
+            timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            contentElem.appendChild(timestampElem);
         }
-
-        // Timestamp
-        const timestampElem = document.createElement('div');
-        timestampElem.className = 'message-timestamp';
-        const now = new Date();
-        timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        contentElem.appendChild(timestampElem);
 
         messageElem.appendChild(contentElem);
         messagesContainer.appendChild(messageElem);

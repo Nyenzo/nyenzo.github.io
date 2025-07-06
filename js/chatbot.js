@@ -758,6 +758,53 @@ class NyenzoChatbot {
 
     handleProjectQuestion(input) {
         const projects = this.knowledgeBase.projects;
+        // Conversational memory: handle follow-up requests for more details
+        const followUpPhrases = ['tell me more', 'more details', 'elaborate', 'give me more', 'can you elaborate', 'expand', 'explain more', 'go deeper', 'details', 'explain further'];
+        const lastUserMsg = this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase() : '';
+        let lastProject = null;
+        if (lastUserMsg.includes('aivestor')) lastProject = 'aivestor';
+        else if (lastUserMsg.includes('pregnancy')) lastProject = 'pregnancy';
+        else if (lastUserMsg.includes('tender')) lastProject = 'tender';
+        else if (lastUserMsg.includes('project')) lastProject = 'project';
+        if (followUpPhrases.some(phrase => input.includes(phrase)) && lastProject) {
+            if (lastProject === 'aivestor') {
+                const responses = {
+                    simple: `Aivestor is an AI-powered investment advisor I built. It uses machine learning to analyze real-time market data and predict stock trends. I designed the backend with Python and integrated a React.js frontend for a seamless user experience. The system provides users with actionable investment recommendations and risk analysis.`,
+                    technical: `Aivestor leverages advanced ML models (including LSTM and XGBoost) to forecast stock prices and market trends. The backend is built with Python (Flask), and the frontend uses React.js. I implemented data pipelines for ingesting and cleaning financial data, and the system generates personalized investment advice based on user risk profiles.`,
+                    casual: `Aivestor is my AI investment buddy! It looks at tons of market data, predicts trends, and gives users smart tips on what to invest in. I built it with Python and React. Super fun project!`,
+                    conversational: `Aivestor is an AI investment advisor I created. It analyzes real-time market data, predicts trends, and gives users personalized investment advice. I used Python for the backend and React for the frontend. Want to know about the tech stack or how the predictions work?`
+                };
+                this.followUpQuestion = "Curious about the tech stack or how the predictions work?";
+                return responses[this.responseStyle] || responses.conversational;
+            } else if (lastProject === 'pregnancy') {
+                const responses = {
+                    simple: `The pregnancy outcomes project used a decision tree model to predict risks for mothers in Kenya. I worked with the KDHS dataset, cleaned and analyzed the data, and built a dashboard for healthcare insights.`,
+                    technical: `For the pregnancy outcomes project, I used a decision tree classifier on the 2022 KDHS dataset. I engineered features, handled missing data, and evaluated the model with cross-validation. The results were visualized in a dashboard for healthcare professionals.`,
+                    casual: `This project was all about helping moms! I used data from Kenya to predict risks and built a dashboard for doctors. Lots of data cleaning and model tweaking!`,
+                    conversational: `The pregnancy outcomes project aimed to help healthcare providers identify risks for mothers. I used a decision tree model, cleaned the KDHS data, and built a dashboard to visualize the results. Want to know more about the data or the dashboard?`
+                };
+                this.followUpQuestion = "Want to know more about the data or the dashboard?";
+                return responses[this.responseStyle] || responses.conversational;
+            } else if (lastProject === 'tender') {
+                const responses = {
+                    simple: `The tender dashboard project analyzed bidding data to help businesses improve their success rates. I built a web dashboard to visualize trends and key metrics.`,
+                    technical: `For the tender dashboard, I collected and analyzed bidding data, then built a web dashboard using React and D3.js. The dashboard visualizes win rates, bid amounts, and trends to help organizations optimize their bidding strategies.`,
+                    casual: `This project was about helping companies win more bids! I made a dashboard that shows what works and what doesn’t. Built it with React and D3.`,
+                    conversational: `The tender dashboard project helps businesses analyze their bidding performance. I built a web dashboard to visualize trends and key metrics. Want to know about the data sources or the visualizations?`
+                };
+                this.followUpQuestion = "Want to know about the data sources or the visualizations?";
+                return responses[this.responseStyle] || responses.conversational;
+            } else if (lastProject === 'project') {
+                const responses = {
+                    simple: `I can share more about my projects! For example, Aivestor is an AI investment advisor, and I also built a dashboard for analyzing tender bidding success rates. Which one would you like to hear more about?`,
+                    technical: `I have several projects, including Aivestor (an AI investment advisor using ML models) and a tender bidding dashboard (built with React and D3.js). Let me know which one you want to dive into!`,
+                    casual: `Sure! I’ve got Aivestor (AI for investing) and a dashboard for tender bids. Which sounds interesting?`,
+                    conversational: `I have a few projects I can tell you more about, like Aivestor or my tender dashboard. Which one would you like to hear about?`
+                };
+                this.followUpQuestion = "Which project would you like to dive into?";
+                return responses[this.responseStyle] || responses.conversational;
+            }
+        }
         if (input.includes('pregnancy')) {
             const responses = {
                 simple: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`,

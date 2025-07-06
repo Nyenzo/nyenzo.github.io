@@ -1,4 +1,4 @@
-// Advanced AI Chatbot for Nyenzo Isabwa
+// AI Chatbot for Peter Nyenzo Isabwa - Portfolio Assistant
 class SentimentModel {
     constructor() {
         this.vocabulary = new Set();
@@ -11,7 +11,7 @@ class SentimentModel {
     }
 
     initializeModel() {
-        // Initialize with basic sentiment words
+        // Initialize sentiment analysis vocabulary
         const positiveWords = ['great', 'awesome', 'good', 'happy', 'excited', 'love', 'amazing', 'cool', 'fantastic', 'excellent', 'wonderful', 'perfect', 'brilliant', 'outstanding'];
         const negativeWords = ['bad', 'sad', 'terrible', 'awful', 'upset', 'hate', 'poor', 'horrible', 'disappointing', 'frustrated', 'angry', 'worried', 'confused'];
         
@@ -46,7 +46,7 @@ class SentimentModel {
     }
 
     learnFromInteraction(userInput, botResponse, userFeedback = null) {
-        // Extract words and update vocabulary
+        // Update vocabulary and conversation patterns
         const words = userInput.toLowerCase().split(/\s+/);
         words.forEach(word => {
             this.vocabulary.add(word);
@@ -56,7 +56,6 @@ class SentimentModel {
             this.wordFrequencies[word]++;
         });
 
-        // Store conversation pattern
         this.conversationPatterns.push({
             input: userInput,
             response: botResponse,
@@ -64,7 +63,7 @@ class SentimentModel {
             feedback: userFeedback
         });
 
-        // Update sentiment weights based on context
+        // Update sentiment weights based on user feedback
         if (userFeedback) {
             words.forEach(word => {
                 if (!this.sentimentWeights[word]) {
@@ -74,33 +73,31 @@ class SentimentModel {
             });
         }
 
-        // Limit conversation patterns to last 100 interactions
+        // Maintain conversation history limit
         if (this.conversationPatterns.length > 100) {
             this.conversationPatterns = this.conversationPatterns.slice(-100);
         }
     }
 
     generatePersonalizedResponse(input, context) {
-        // Find similar past interactions
+        // Find similar past interactions for personalized responses
         const similarPatterns = this.conversationPatterns.filter(pattern => 
             pattern.input.toLowerCase().includes(input.toLowerCase()) ||
             input.toLowerCase().includes(pattern.input.toLowerCase())
         );
 
         if (similarPatterns.length > 0) {
-            // Use the most recent similar pattern
             const recentPattern = similarPatterns[similarPatterns.length - 1];
             return this.adaptResponse(recentPattern.response, context);
         }
 
-        return null; // Fall back to rule-based response
+        return null;
     }
 
     adaptResponse(templateResponse, context) {
-        // Simple adaptation - can be enhanced with more sophisticated NLP
+        // Adapt response based on sentiment context
         let adaptedResponse = templateResponse;
         
-        // Personalize based on context
         if (context.sentiment === 'positive') {
             adaptedResponse = adaptedResponse.replace(/\./g, '! 😊');
         } else if (context.sentiment === 'negative') {
@@ -121,8 +118,9 @@ class SentimentModel {
 
 class NyenzoChatbot {
     constructor() {
-        this.knowledgeBase = this.loadKnowledgeBase();
-        this.trainingQA = this.loadTrainingQA();
+        this.knowledgeBase = this.initializeKnowledgeBase();
+        this.funFacts = this.initializeFunFacts();
+        this.trainingPrompts = this.initializeTrainingPrompts();
         this.conversationHistory = [];
         this.isOpen = false;
         this.sentimentScore = 0;
@@ -131,30 +129,26 @@ class NyenzoChatbot {
         this.followUpQuestion = null;
         this.mlModel = new SentimentModel();
         this.learningMode = true;
+        this.currentStyle = 'professional'; // professional, casual, technical, friendly
+        this.styleCounter = 0;
         this.init();
     }
 
-    // Load structured knowledge base
-    loadKnowledgeBase() {
+    initializeKnowledgeBase() {
         return {
-            funFacts: [
-                "Did you know that bananas are berries, but strawberries aren't? Botanically speaking, berries are fruits from a single flower's ovary with seeds inside - so bananas, kiwis, and eggplants are berries!",
-                "The Eiffel Tower can grow over 6 inches taller in summer due to thermal expansion! The metal expands when heated, making the tower noticeably taller in hot weather.",
-                "AI can now reconstruct images directly from human brainwaves! Neural decoders can create blurry images of what a person is seeing based solely on fMRI brain scans.",
-                "In 2017, Facebook had to shut down an AI experiment because two chatbots started communicating in a language they invented themselves! It wasn't dangerous, but it was unexpected and raised questions about AI transparency.",
-                // ... (add all 30 fun facts from your latest list)
-            ],
             personal: {
                 name: "Peter Nyenzo Isabwa",
-                title: "Data Scientist",
+                title: "Data Scientist & Software Developer",
                 location: "Nairobi, Kenya",
                 phone: "(+254) 796-952247",
                 email: "nyenzoisabwa@gmail.com",
                 linkedin: "https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/",
                 github: "https://github.com/Nyenzo",
                 website: "nyenzo.github.io",
-                background: "I am a dedicated Data Scientist with expertise in machine learning, data analysis, and web development. My passion lies in transforming data into actionable insights and developing robust machine learning models to address real-world challenges. I thrive in environments with minimal supervision and excel at meeting tight deadlines. Additionally, I have a keen interest in creating interactive websites and web applications.",
+                currentStatus: "Freelance Programmer (Jan 2023 - Present)",
+                background: "I am a dedicated Data Scientist with expertise in machine learning, data analysis, and web development. My passion lies in transforming data into actionable insights and developing robust machine learning models to address real-world challenges. I thrive in environments with minimal supervision and excel at meeting tight deadlines.",
                 philosophy: "Data is the new oil, and AI is the engine that drives innovation. I'm passionate about building the bridge between raw data and meaningful insights.",
+                personality: "Adventurous, loves trying and learning new things. Believes in deep conversations and going with life's flow.",
                 hobbies: {
                     music: "I play both piano and guitar, finding rhythm in melodies. Music flows through my daily life!",
                     swimming: "I love swimming laps - it keeps me active and energized.",
@@ -168,193 +162,323 @@ class NyenzoChatbot {
             },
             education: {
                 degree: "Bachelor of Science in Mathematics and Computer Science",
-                institution: "JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY",
-                duration: "Sep 2018 - May 2025",
+                institution: "Jomo Kenyatta University of Agriculture and Technology (JKUAT)",
+                duration: "September 2018 - May 2025",
+                status: "Completed May 2025",
                 focus: "Mathematics, Computer Science, Data Analysis, Machine Learning",
                 achievements: ["Academic Excellence", "Research Project on Pregnancy Outcomes Prediction"],
                 certifications: [
                     {
-                        name: "Certification in AI",
+                        name: "AI Certification",
                         issuer: "HUAWEI",
                         year: "Feb 2025 - Jun 2025",
                         description: "Artificial Intelligence and machine learning technologies"
                     },
                     {
-                        name: "Certification in Software Engineering",
+                        name: "Software Engineering Certification",
                         issuer: "ALX AFRICA",
                         year: "Feb 2023 - Apr 2024",
                         description: "Software engineering principles and practices"
                     }
                 ]
             },
-            skills: {
-                programming: {
-                    python: { description: "Primary language for data science and ML" },
-                    javascript: { description: "Full-stack web development" },
-                    nodejs: { description: "Backend API development" },
-                    nextjs: { description: "React framework for production" }
-                },
-                dataScience: {
-                    machineLearning: { description: "Scikit-learn, TensorFlow, PyTorch" },
-                    deepLearning: { description: "Neural networks and advanced ML" },
-                    dataAnalysis: { description: "Pandas, NumPy, Matplotlib, Seaborn" },
-                    statistics: { description: "Statistical modeling and hypothesis testing" }
-                },
-                webDevelopment: {
-                    react: { description: "Modern frontend development" },
-                    nodejs: { description: "Backend API development" },
-                    htmlcss: { description: "Responsive web design" },
-                    nextjs: { description: "React framework for production" },
-                    firebase: { description: "Backend-as-a-Service platform" }
-                },
-                databases: {
-                    mysql: { description: "Relational database management" },
-                    mongodb: { description: "NoSQL document database" },
-                    postgresql: { description: "Advanced open-source database" }
-                },
-                tools: {
-                    git: { description: "Version control and collaboration" },
-                    gitHub: { description: "Code repository and collaboration" }
-                },
-                softSkills: {
-                    problemSolving: { description: "Analytical and critical thinking" },
-                    teamwork: { description: "Collaboration and team leadership" },
-                    timeManagement: { description: "Meeting tight deadlines" },
-                    leadership: { description: "Team leadership and project management" },
-                    communication: { description: "Effective verbal and written communication" },
-                    criticalThinking: { description: "Analytical problem-solving approach" }
-                }
-            },
-            projects: {
-                pregnancyPrediction: {
-                    name: "Predicting Adverse Pregnancy Outcomes in Kenya Using Machine Learning",
-                    institution: "JOMO KENYATTA UNIVERSITY OF AGRICULTURE AND TECHNOLOGY",
-                    duration: "Oct 2024 - Apr 2025",
-                    supervisor: "Dr. Barini",
-                    description: "Developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset",
-                    technologies: ["Machine Learning", "Python", "Data Analysis", "Decision Trees", "Statistical Modeling"],
-                    features: [
-                        "Analyzed key factors such as total pregnancies, birth intervals, and education level to identify risk patterns",
-                        "Achieved up to 90.83% sensitivity in prediction models",
-                        "Compared weighted and unweighted models to assess prediction reliability",
-                        "Provided actionable insights for targeted maternal healthcare interventions in Kenya"
-                    ],
-                    impact: "Research project with potential to improve maternal healthcare outcomes in Kenya"
-                },
-                aiInvestmentAdvisor: {
-                    name: "AI Investment Advisor with Stock Predictor",
-                    description: "Developed an AI investment advisor featuring an advanced stock predictor",
-                    technologies: ["Python", "Machine Learning", "AI", "Stock Prediction", "Data Analysis"],
-                    features: [
-                        "Advanced stock prediction algorithms",
-                        "Real-time market data analysis",
-                        "AI-powered investment recommendations",
-                        "High accuracy prediction model"
-                    ],
-                    impact: "Achieved over 90% accuracy on real-world data"
-                },
-                tenderAnalysisDashboard: {
-                    name: "Tender Bidding Success Rate Analysis Dashboard",
-                    description: "Created a dashboard for analyzing tender bidding success rates",
-                    technologies: ["Data Visualization", "Dashboard Development", "Business Intelligence", "Data Analysis"],
-                    features: [
-                        "Interactive dashboard for tender analysis",
-                        "Success rate tracking and visualization",
-                        "Strategic insights for business improvements",
-                        "Data-driven decision making tools"
-                    ],
-                    impact: "Provided insights for strategic improvements in tender bidding"
-                }
-            },
             experience: {
                 current: {
                     role: "Freelance Programmer",
-                    title: "Data Scientist, Software Developer",
                     duration: "Jan 2023 - Present",
-                    location: "Nairobi, Kenya",
+                    focus: "Data Science and Software Development",
                     achievements: [
-                        "Developed an AI investment advisor featuring an advanced stock predictor, achieving over 90% accuracy on real-world data",
-                        "Collaborated with a small business to create a dashboard for analyzing tender bidding success rates, providing insights for strategic improvements"
+                        "Developed an AI investment advisor with 90%+ accuracy on real-world data",
+                        "Created business dashboards for tender bidding analysis",
+                        "Thrives in minimal supervision environments",
+                        "Excels at meeting tight deadlines"
                     ]
                 },
                 previous: {
                     role: "Sales and Marketing Intern",
                     company: "Strummels Investments",
                     duration: "Jan 2019 - May 2019",
-                    location: "Nairobi, Kenya",
-                    achievements: [
-                        "Increased client acquisition by conducting targeted door-to-door marketing efforts, resulting in a significant boost in sales"
-                    ]
+                    achievement: "Increased client acquisition through targeted marketing efforts"
+                }
+            },
+            skills: {
+                programming: {
+                    python: { description: "Primary language for data science and ML", level: "Expert" },
+                    javascript: { description: "Full-stack web development", level: "Advanced" },
+                    nodejs: { description: "Backend API development", level: "Advanced" },
+                    nextjs: { description: "React framework for production", level: "Advanced" },
+                    html: { description: "Frontend development", level: "Expert" },
+                    css: { description: "Responsive web design", level: "Advanced" }
                 },
-                domains: ["Finance", "Healthcare Technology", "Business Intelligence", "Marketing"],
-                expertise: ["AI-powered financial applications", "Data analysis and visualization", "Web development", "Machine learning models", "Business intelligence dashboards"],
-                approach: ["Problem-solving", "Innovation", "Collaboration", "Results-driven", "Minimal supervision", "Meeting tight deadlines"],
-                achievements: [
-                    "Developed AI investment advisor with 90%+ accuracy",
-                    "Created business intelligence dashboard for tender analysis",
-                    "Increased client acquisition through targeted marketing",
-                    "Conducted research on pregnancy outcomes prediction"
-                ]
+                dataScience: {
+                    machineLearning: { description: "Scikit-learn, Random Forest, Decision Trees", level: "Expert" },
+                    deepLearning: { description: "PyTorch, Neural Networks", level: "Advanced" },
+                    dataAnalysis: { description: "Pandas, NumPy, Data Visualization", level: "Expert" },
+                    statistics: { description: "Advanced statistical modeling", level: "Advanced" },
+                    modelEvaluation: { description: "Cross-validation, Performance metrics", level: "Expert" }
+                },
+                webDevelopment: {
+                    react: { description: "Modern frontend development", level: "Advanced" },
+                    nodejs: { description: "Backend API development", level: "Advanced" },
+                    htmlcss: { description: "Responsive web design", level: "Expert" },
+                    nextjs: { description: "React framework for production", level: "Advanced" },
+                    firebase: { description: "Backend-as-a-Service platform", level: "Intermediate" }
+                },
+                databases: {
+                    mysql: { description: "Relational database management", level: "Advanced" },
+                    mongodb: { description: "NoSQL database", level: "Advanced" },
+                    postgresql: { description: "Advanced relational database", level: "Advanced" },
+                    firebase: { description: "Cloud database platform", level: "Intermediate" }
+                },
+                tools: {
+                    git: { description: "Version control", level: "Advanced" },
+                    apis: { description: "Financial data APIs, FRED, Alpha Vantage", level: "Advanced" },
+                    visualization: { description: "Matplotlib, Seaborn", level: "Advanced" },
+                    textProcessing: { description: "TextBlob, PyPDF2, Transformers", level: "Advanced" }
+                }
             },
-            interview: {
-                strengths: [
-                    "Strong technical skills in data science and software engineering",
-                    "Experience with cutting-edge AI and ML technologies",
-                    "Proven track record of delivering innovative solutions",
-                    "Ability to work across multiple domains",
-                    "Passion for continuous learning and innovation",
-                    "Excellent problem-solving and analytical skills",
-                    "Strong communication and collaboration abilities"
-                ],
-                motivations: [
-                    "Creating innovative solutions that solve real-world problems",
-                    "Advancing AI and machine learning applications",
-                    "Contributing to open-source projects",
-                    "Mentoring and knowledge sharing in the tech community",
-                    "Building scalable and maintainable systems",
-                    "Staying at the forefront of technology innovation"
-                ],
-                goals: [
-                    "Advancing AI and machine learning applications",
-                    "Developing scalable web solutions",
-                    "Contributing to open-source projects",
-                    "Mentoring and knowledge sharing in the tech community",
-                    "Leading innovative technology projects",
-                    "Building sustainable and ethical AI systems"
-                ]
+            projects: {
+                aivestor: {
+                    name: "Aivestor AI - Advanced Investment Advisory System",
+                    description: "AI-powered investment system combining ML, sentiment analysis, and economic indicators",
+                    features: [
+                        "Advanced stock prediction using machine learning",
+                        "Real-time sentiment analysis from news and social media",
+                        "Economic indicator integration via FRED data",
+                        "Portfolio optimization based on risk tolerance",
+                        "RESTful API for frontend integration"
+                    ],
+                    technologies: ["Python", "scikit-learn", "PyTorch", "Flask", "PostgreSQL"],
+                    impact: "Provides intelligent stock market predictions and personalized portfolio recommendations",
+                    accuracy: "90%+ accuracy on real-world data"
+                },
+                tradingBot: {
+                    name: "Algorithmic Trading Bot",
+                    description: "Sophisticated trading system for forex and gold markets",
+                    features: [
+                        "Real-time data collection for multiple currency pairs (XAUUSD, GBPUSD, USDJPY, AUDUSD)",
+                        "Advanced technical analysis with various indicators",
+                        "Machine learning-based signal prediction using Random Forest",
+                        "Automated trading during EAT market hours",
+                        "Economic indicators integration",
+                        "Comprehensive backtesting and model evaluation"
+                    ],
+                    technologies: ["Python", "pandas", "scikit-learn", "yfinance", "alpha_vantage"],
+                    achievement: "Achieved over 90% accuracy in stock prediction"
+                },
+                tuleInitiative: {
+                    name: "Tule Initiative Website",
+                    description: "Community-driven website built with Next.js",
+                    features: [
+                        "Server-side rendering for improved SEO and performance",
+                        "Dynamic content integration with Firebase",
+                        "Responsive design with optimized images",
+                        "Admin dashboard functionality",
+                        "Consistent layout system with Navbar and Footer"
+                    ],
+                    technologies: ["Next.js", "Firebase", "Font Awesome"],
+                    highlights: "Utilized Next.js's file-based routing, layout system, and Image component for optimization"
+                },
+                pregnancyOutcomes: {
+                    name: "Pregnancy Outcomes Prediction (Academic Project)",
+                    description: "ML model to predict adverse pregnancy outcomes in Kenya",
+                    duration: "October 2024 - April 2025",
+                    dataset: "2022 Kenya Demographic and Health Survey (KDHS)",
+                    methodology: "Decision tree-based machine learning model",
+                    factors: ["Total pregnancies", "Birth intervals", "Education level"],
+                    achievement: "90.83% sensitivity in prediction",
+                    impact: "Provides actionable insights for maternal healthcare interventions in Kenya",
+                    supervision: "Dr. Barini at JKUAT"
+                }
             },
-            sentiments: {
-                positive: ["great", "awesome", "good", "happy", "excited", "love", "amazing", "cool", "fantastic"],
-                negative: ["bad", "sad", "terrible", "awful", "upset", "hate", "poor", "horrible"],
-                neutral: ["ok", "fine", "alright", "normal", "okay"]
-            }
+            coreCompetencies: {
+                technical: ["Problem Solving", "Critical Thinking", "Machine Learning", "Data Analysis"],
+                softSkills: ["Teamwork", "Time Management", "Leadership", "Effective Communication"],
+                workStyle: ["Objective", "deadline-driven", "minimal supervision required"]
+            },
+            futureGoals: [
+                "Making a transformative impact on society through AI and technology",
+                "Solving real-world problems that improve people's lives",
+                "Developing AI solutions that address challenges in healthcare, finance, and community development",
+                "Building technology that democratizes access to essential services",
+                "Creating sustainable solutions that benefit underserved communities",
+                "Expanding AI applications to transform lives across Africa and beyond"
+            ]
         };
     }
 
-    // Load Q&A pairs from training prompts
-    loadTrainingQA() {
-        return [
-            { q: "what's your name", a: { conversational: "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital." } },
-            { q: "what's your educational background", a: { conversational: "I completed my Bachelor of Science in Mathematics and Computer Science at Jomo Kenyatta University of Agriculture and Technology (JKUAT) in May 2025. I studied there from September 2018 to May 2025." } },
-            // ... (add more Q&A pairs from the latest training prompts)
-        ];
+    initializeFunFacts() {
+        return {
+            ai: [
+                "Facebook researchers shut down an AI experiment in 2017 after two chatbots started communicating in a language they invented themselves - not programmed to use!",
+                "Neural decoders can now reconstruct images directly from human brainwaves using fMRI scans, essentially creating blurry pictures of what you're thinking about.",
+                "GPT models can generate text in the style of famous authors so convincingly that even literature professors sometimes can't tell the difference from the original.",
+                "MIT researchers used AI to discover halicin, a powerful antibiotic that can kill some of the world's most dangerous drug-resistant bacteria.",
+                "OpenAI's Dota 2 bot defeated world champions, making decisions faster than any human player and developing strategies that pros had never seen before.",
+                "Researchers developed AI that can determine personality traits just by analyzing eye movements and blinking patterns with 42% accuracy.",
+                "DeepMind's AlphaFold solved the 50-year-old protein folding problem, potentially revolutionizing drug discovery and understanding of diseases.",
+                "An AI-generated portrait called 'Portrait of Edmond Belamy' sold for $432,500 at Christie's auction house in 2018.",
+                "Google developed an AI that can predict what molecules will smell like just by analyzing their chemical structure, outperforming human experts.",
+                "An AI system called ALPHA consistently defeated experienced fighter pilots in simulated air combat scenarios.",
+                "Machine learning algorithms can detect deception in text and speech with higher accuracy than trained human interrogators.",
+                "AI can now automatically colorize black and white photos and restore damaged historical images with incredible accuracy.",
+                "AIVA (Artificial Intelligence Virtual Artist) became the first AI to be recognized as a composer by a music society and creates symphonies indistinguishable from human compositions.",
+                "Google's AI can predict patient deaths up to 24 hours before traditional methods, potentially saving thousands of lives through early intervention.",
+                "DeepMind's AI agents learned to walk, run, and navigate obstacle courses just like human toddlers - through trial and error.",
+                "Google's AI achieved 95% accuracy in lip-reading, compared to professional human lip-readers who average around 52%.",
+                "An AI-powered robot solved a Rubik's cube in just 0.38 seconds, faster than the human world record of 4.22 seconds.",
+                "AI can now detect emotions, stress levels, and even mental health conditions just by analyzing the tone and patterns in your voice.",
+                "Modern deepfake technology can create videos of people saying things they never said, so realistic that even digital forensics experts struggle to detect them.",
+                "Researchers use Minecraft as a testing ground for AI because it's complex enough to mirror real-world decision-making and social interactions."
+            ],
+            general: [
+                "Botanically speaking, a berry is a fruit from a single flower's ovary with seeds inside. So bananas, kiwis, and eggplants are berries, but strawberries aren't!",
+                "Due to thermal expansion, the Eiffel Tower can grow over 6 inches taller in summer when the metal expands from heat.",
+                "Octopuses have three hearts. Two hearts pump blood to the gills, while the third pumps blood to the rest of the body. The main heart actually stops beating when they swim!",
+                "Archaeologists have found 3,000-year-old honey in Egyptian tombs that's still perfectly edible. Its low moisture and acidic pH prevent bacteria growth.",
+                "Venus rotates so slowly that one day (243 Earth days) is longer than one year (225 Earth days). Plus, it rotates backwards!",
+                "When you exercise, your body naturally produces salicylic acid - the same compound found in aspirin - which helps reduce inflammation.",
+                "Oxford University was founded around 1096, while the Aztec Empire was established in 1345 - nearly 250 years later!",
+                "Cleopatra lived around 30 BCE, while the Great Pyramid was built around 2560 BCE - that's a 2,530-year difference. The moon landing was only 2,000 years after Cleopatra!",
+                "Earth has about 3 trillion trees, while the Milky Way has an estimated 100-400 billion stars. Trees win by a factor of 10!",
+                "Wombats are the only animals that produce cube-shaped droppings. Scientists recently discovered it's due to the unique elasticity of their intestinal walls!"
+            ]
+        };
     }
 
-    // Find best Q&A match for user input
-    findBestQAMatch(input) {
-        input = input.toLowerCase();
-        for (const qa of this.trainingQA) {
-            if (input.includes(qa.q)) {
-                return qa.a;
+    initializeTrainingPrompts() {
+        return {
+            // Personal & Background Questions
+            "what's your name": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "where are you from": "I'm from Nairobi, Kenya - a vibrant city that's become a major tech hub in East Africa. Being here gives me unique insights into local markets and challenges.",
+            "educational background": "I completed my Bachelor of Science in Mathematics and Computer Science at Jomo Kenyatta University of Agriculture and Technology (JKUAT) in May 2025. I studied there from September 2018 to May 2025.",
+            "what do you do": "I'm a freelance programmer specializing in data science and software development. I've been working independently since January 2023, developing AI solutions and helping businesses with data-driven insights.",
+            "contact information": "You can reach me at (+254) 796-952247 or email me at nyenzoisabwa@gmail.com. I'm also available on LinkedIn and have my own website.",
+            "hobbies": "I love playing piano and guitar, swimming, keeping fit, gaming, writing, and reading. Music is a big part of my life, and I enjoy balancing creative pursuits with physical activities.",
+
+            // Technical Skills
+            "programming languages": "I work with Python extensively for data science and machine learning. I also use JavaScript with React and Next.js for frontend development, and Node.js for backend work. I'm proficient in HTML, CSS, and work with various databases.",
+            "databases": "I have experience with MySQL, MongoDB, PostgreSQL, and Firebase. I choose the database based on the project requirements - SQL databases for structured data and NoSQL for more flexible data models.",
+            "machine learning frameworks": "I primarily use scikit-learn for general machine learning tasks, and PyTorch for deep learning projects. I also work with pandas and NumPy for data manipulation and analysis.",
+            "apis": "Yes, I work with various APIs including Alpha Vantage for financial data, FRED for economic indicators, and News API for sentiment analysis. I also build RESTful APIs using Flask.",
+            "web development": "I specialize in modern web development using React and Next.js. I've built full-stack applications with server-side rendering, database integration, and responsive design.",
+
+            // Projects
+            "aivestor": "Aivestor AI is an advanced investment advisory system that combines machine learning, sentiment analysis, and economic indicators to provide intelligent stock market predictions and portfolio recommendations. It achieved over 90% accuracy on real-world data.",
+            "trading bot": "My algorithmic trading bot combines technical analysis with machine learning to predict market movements in forex and gold markets. It operates during East Africa Time market hours and integrates multiple data sources for comprehensive analysis.",
+            "tule initiative": "The Tule Initiative is a community-driven website I built using Next.js. It features server-side rendering for better SEO, dynamic content integration with Firebase, and includes an admin dashboard for community management.",
+            "pregnancy outcomes": "This is my academic project at JKUAT where I developed a machine learning model to predict adverse pregnancy outcomes in Kenya using the 2022 Kenya Demographic and Health Survey dataset. The model achieved 90.83% sensitivity.",
+
+            // Technical Implementation
+            "90% accuracy": "I combined multiple data sources including real-time market data, sentiment analysis from news and social media, technical indicators, and economic data from FRED. The Random Forest algorithm proved most effective for this multi-dimensional analysis.",
+            "technical indicators": "I use a comprehensive set of technical indicators including moving averages, RSI, MACD, Bollinger Bands, and volume indicators. These are processed through the TA library and fed into the machine learning model.",
+            "real-time data": "I use yfinance and Alpha Vantage APIs for real-time data collection, with scheduled data gathering during market hours. The system processes this data through pandas for analysis and feeds it into the prediction models.",
+            "sentiment analysis": "I use TextBlob and Transformers for natural language processing to analyze market sentiment from news articles and social media. This sentiment data is then incorporated into the investment decision-making process.",
+            "model reliability": "I use cross-validation techniques, compare weighted and unweighted models, and conduct comprehensive backtesting. I also regularly retrain models to maintain performance as market conditions change.",
+
+            // Fun Facts
+            "bananas berries": "Did you know that bananas are berries, but strawberries aren't? Botanically speaking, berries are fruits from a single flower's ovary with seeds inside - so bananas, kiwis, and eggplants are berries!",
+            "eiffel tower": "The Eiffel Tower can grow over 6 inches taller in summer due to thermal expansion! The metal expands when heated, making the tower noticeably taller in hot weather.",
+            "ai language": "In 2017, Facebook had to shut down an AI experiment because two chatbots started communicating in a language they invented themselves! It wasn't dangerous, but it was unexpected and raised questions about AI transparency.",
+            "ai brainwaves": "AI can now reconstruct images directly from human brainwaves! Neural decoders can create blurry images of what a person is seeing based solely on fMRI brain scans. AI is literally helping us read minds!",
+            "ai mind reading": "Neural decoders can now reconstruct images directly from human brainwaves using fMRI scans, essentially creating blurry pictures of what you're thinking about.",
+
+            // Career & Future
+            "career goals": "I want to continue growing as a data scientist, focus on AI applications that benefit communities, and eventually start my own tech company focused on solving African challenges with AI.",
+            "5 years": "I see myself as a leading AI practitioner in East Africa, possibly running my own consultancy or tech company, and contributing to AI research that addresses local challenges.",
+            "dream project": "I'd love to work on a large-scale AI system that improves healthcare outcomes across Africa, combining my technical skills with meaningful social impact.",
+            "professional growth": "I plan to keep learning new technologies, work on increasingly complex projects, pursue advanced certifications, and possibly pursue graduate studies in AI or data science.",
+
+            // Philosophy & Approach
+            "data science philosophy": "I believe in transforming data into actionable insights that address real-world challenges. It's not just about building models - it's about creating solutions that make a meaningful impact.",
+            "problem solving": "I start by clearly defining the problem, then break it down into manageable components. I use both analytical thinking and creative approaches to find effective solutions.",
+            "ai interest": "I'm fascinated by AI's potential to solve complex problems and its rapid evolution. From chatbots creating their own language to AI reading brainwaves, the possibilities are endless and exciting.",
+            "challenging projects": "I thrive on challenges and approach them systematically. I break down complex problems, research thoroughly, and aren't afraid to try innovative approaches when traditional methods aren't sufficient.",
+            "ai future": "AI is rapidly evolving and will continue to transform various industries. I'm particularly interested in AI applications that benefit communities and solve real-world problems, like healthcare and financial inclusion."
+        };
+    }
+
+    // Multiple answering styles
+    getResponseStyle() {
+        const styles = ['professional', 'casual', 'technical', 'friendly'];
+        this.styleCounter++;
+        return styles[this.styleCounter % styles.length];
+    }
+
+    formatResponse(response, style) {
+        switch(style) {
+            case 'professional':
+                return response;
+            case 'casual':
+                return response.replace(/\./g, '! 😊').replace(/I am/g, "I'm").replace(/I have/g, "I've");
+            case 'technical':
+                return `[Technical Analysis] ${response}`;
+            case 'friendly':
+                return `Hey there! ${response} 😊`;
+            default:
+                return response;
+        }
+    }
+
+    getRandomFunFact(category = null) {
+        let facts = [];
+        if (category === 'ai' || !category) {
+            facts = facts.concat(this.funFacts.ai);
+        }
+        if (category === 'general' || !category) {
+            facts = facts.concat(this.funFacts.general);
+        }
+        return facts[Math.floor(Math.random() * facts.length)];
+    }
+
+    // Enhanced response generation with multiple styles
+    generateEnhancedResponse(input, context) {
+        const style = this.getResponseStyle();
+        let response = this.findBestMatch(input);
+        
+        if (!response) {
+            // Fallback to fun facts or general response
+            if (input.toLowerCase().includes('fun fact') || input.toLowerCase().includes('interesting')) {
+                response = `Here's a fascinating fact: ${this.getRandomFunFact()}`;
+            } else {
+                response = "That's an interesting question! I'd be happy to discuss my work in data science, AI, or any of my projects. What would you like to know more about?";
             }
         }
-        return null;
+
+        return this.formatResponse(response, style);
     }
 
-    // Get a random fun fact
-    getFunFact() {
-        const facts = this.knowledgeBase.funFacts;
-        return facts[Math.floor(Math.random() * facts.length)];
+    findBestMatch(input) {
+        const normalizedInput = input.toLowerCase();
+        
+        // Check training prompts first
+        for (const [key, value] of Object.entries(this.trainingPrompts)) {
+            if (normalizedInput.includes(key)) {
+                return value;
+            }
+        }
+
+        // Check knowledge base
+        if (normalizedInput.includes('name') || normalizedInput.includes('who are you')) {
+            return this.knowledgeBase.personal.name + " - " + this.knowledgeBase.personal.title;
+        }
+        
+        if (normalizedInput.includes('education') || normalizedInput.includes('degree')) {
+            return `I have a ${this.knowledgeBase.education.degree} from ${this.knowledgeBase.education.institution} (${this.knowledgeBase.education.duration}).`;
+        }
+
+        if (normalizedInput.includes('project') || normalizedInput.includes('work')) {
+            const projects = Object.values(this.knowledgeBase.projects);
+            const randomProject = projects[Math.floor(Math.random() * projects.length)];
+            return `One of my notable projects is ${randomProject.name}. ${randomProject.description}`;
+        }
+
+        if (normalizedInput.includes('skill') || normalizedInput.includes('technology')) {
+            const skills = Object.keys(this.knowledgeBase.skills.programming);
+            return `My key technical skills include ${skills.join(', ')}. I specialize in data science and web development.`;
+        }
+
+        return null;
     }
 
     init() {
@@ -415,6 +539,9 @@ class NyenzoChatbot {
     }
 
     showInitialTooltip() {
+        // Prevent tooltip if bot is open or welcome not shown
+        if (this.isOpen && !this.hasShownWelcome) return;
+        if (this.isOpen) return;
         const toggleBtn = document.getElementById('chatbot-toggle');
         if (!toggleBtn) return;
         let tooltip = document.createElement('div');
@@ -453,6 +580,11 @@ class NyenzoChatbot {
         const window = document.getElementById('chatbot-window');
         this.isOpen = !this.isOpen;
         window.style.display = this.isOpen ? 'flex' : 'none';
+        // Hide tooltip immediately if opening bot
+        if (this.isOpen) {
+            const tooltip = document.getElementById('chatbot-tooltip');
+            if (tooltip) tooltip.remove();
+        }
         if (this.isOpen && !this.hasShownWelcome) {
             this.loadWelcomeMessage();
             this.hasShownWelcome = true;
@@ -470,9 +602,10 @@ class NyenzoChatbot {
 
     loadWelcomeMessage() {
         if (this.hasShownWelcome) return;
-        
+        // Hide tooltip if visible
+        const tooltip = document.getElementById('chatbot-tooltip');
+        if (tooltip) tooltip.remove();
         this.showTypingIndicator();
-        
         setTimeout(() => {
             this.hideTypingIndicator();
             const welcomeMessage = {
@@ -480,9 +613,10 @@ class NyenzoChatbot {
                 content: `Hi! I'm Peter Nyenzo Isabwa. 👋 I'm a Data Scientist passionate about machine learning, data analysis, and web development. \n\nYou can ask me anything about:\n• My skills and technical expertise\n• My projects\n• My background and experience\n• My education and certifications\n• Any question you have about me\n\nWhat would you like to know about me?`
             };
             this.addMessage(welcomeMessage);
+            // Resume tooltips after welcome message
+            setTimeout(() => { this.hasShownWelcome = true; }, 100);
         }, 1000);
-        
-        this.hasShownWelcome = true;
+        // Don't set hasShownWelcome yet; do it after message
     }
 
     handleUserInput() {
@@ -521,94 +655,51 @@ class NyenzoChatbot {
         return sentiment;
     }
 
-    // --- ENHANCED KNOWLEDGE BASE AND PROMPT INTEGRATION ---
-
-    // Load knowledge base and fun facts (simulate loading from chatbot_knowledge_base.md)
-    const CHATBOT_KNOWLEDGE = {
-      funFacts: [
-        "Did you know that bananas are berries, but strawberries aren't? Botanically speaking, berries are fruits from a single flower's ovary with seeds inside - so bananas, kiwis, and eggplants are berries!",
-        "The Eiffel Tower can grow over 6 inches taller in summer due to thermal expansion! The metal expands when heated, making the tower noticeably taller in hot weather.",
-        "AI can now reconstruct images directly from human brainwaves! Neural decoders can create blurry images of what a person is seeing based solely on fMRI brain scans.",
-        "In 2017, Facebook had to shut down an AI experiment because two chatbots started communicating in a language they invented themselves! It wasn't dangerous, but it was unexpected and raised questions about AI transparency."
-      ],
-      // ... (other structured knowledge fields as needed)
-    };
-
-    // Simulate loading Q&A pairs from chatbot_training_prompts.md
-    const CHATBOT_TRAINING_QA = [
-      { q: "what's your name", a: { conversational: "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital." } },
-      { q: "what's your educational background", a: { conversational: "I'm currently pursuing a Bachelor of Science in Mathematics and Computer Science at Jomo Kenyatta University of Agriculture and Technology (JKUAT). I started in September 2018 and I'm graduating in May 2025." } },
-      // ... (add more Q&A pairs as needed)
-    ];
-
-    // Helper: Find best Q&A match for user input
-    function findBestQAMatch(input) {
-      input = input.toLowerCase();
-      for (const qa of CHATBOT_TRAINING_QA) {
-        if (input.includes(qa.q)) {
-          return qa.a;
-        }
-      }
-      return null;
-    }
-
-    // Helper: Get a random fun fact
-    function getRandomFunFact() {
-      const facts = CHATBOT_KNOWLEDGE.funFacts;
-      return facts[Math.floor(Math.random() * facts.length)];
-    }
-
-    // --- ENHANCED FALLBACK IN processUserInput ---
     processUserInput(userInput) {
         const input = userInput.toLowerCase();
         this.conversationHistory.push({ user: userInput, timestamp: new Date() });
 
-        this.responseStyle = this.determineResponseStyle(input);
         const intent = this.detectIntent(input);
         const sentiment = this.analyzeSentiment(userInput);
+        const style = this.getResponseStyle();
 
-        // 1. Try ML model for personalized response first
-        const context = { sentiment, intent, responseStyle: this.responseStyle };
+        // Generate personalized response using ML model
+        const context = { sentiment, intent, style };
         const mlResponse = this.mlModel.generatePersonalizedResponse(userInput, context);
+        
         if (mlResponse && this.learningMode) {
             this.mlModel.learnFromInteraction(userInput, mlResponse);
-            return mlResponse;
+            return this.formatResponse(mlResponse, style);
         }
 
-        // 2. Try Q&A training prompts
-        const qaMatch = this.findBestQAMatch(input);
-        if (qaMatch && qaMatch[this.responseStyle]) {
-            return qaMatch[this.responseStyle];
-        } else if (qaMatch && qaMatch.conversational) {
-            return qaMatch.conversational;
+        // Generate enhanced response using knowledge base
+        let response = this.generateEnhancedResponse(userInput, context);
+        
+        if (!response) {
+            // Fallback to intent-based response handlers
+            if (this.isGreeting(input)) {
+                response = this.handleGreeting(input);
+            } else if (intent === 'skill' || this.isSkillQuestion(input)) {
+                response = this.handleSkillQuestion(input);
+            } else if (intent === 'project' || this.isProjectQuestion(input)) {
+                response = this.handleProjectQuestion(input);
+            } else if (intent === 'personal' || this.isPersonalQuestion(input)) {
+                response = this.handlePersonalQuestion(input);
+            } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
+                response = this.handleInterviewQuestion(input);
+            } else {
+                // Sentiment-aware fallback with fun facts
+                if (sentiment === 'negative') {
+                    response = "I'm sorry to hear that. If you'd like to talk about it or need support, I'm here to listen. Would you like to share more or talk about something that might help?";
+                } else if (sentiment === 'positive') {
+                    response = "I'm glad to hear that! If you want to share more good news or talk about anything else, I'm here for you.";
+                } else {
+                    response = `You caught me, I currently don't have an answer for that but I will look into it. For now here is a fun fact: ${this.getRandomFunFact()}`;
+                }
+            }
         }
 
-        // 3. Existing intent-based logic (skills, projects, etc.)
-        let response;
-        if (this.isGreeting(input)) {
-            response = this.handleGreeting(input);
-        } else if (intent === 'skill' || this.isSkillQuestion(input)) {
-            response = this.handleSkillQuestion(input);
-        } else if (intent === 'project' || this.isProjectQuestion(input)) {
-            response = this.handleProjectQuestion(input);
-        } else if (intent === 'personal' || this.isPersonalQuestion(input)) {
-            response = this.handlePersonalQuestion(input);
-        } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
-            response = this.handleInterviewQuestion(input);
-        } else {
-            // 4. Fallback: Fun fact
-            const funFact = this.getFunFact();
-            response = `I currently don't have an answer for you at the moment, but here is a fun fact: ${funFact}`;
-        }
-
-        if (this.learningMode) {
-            this.mlModel.learnFromInteraction(userInput, response);
-        }
-
-        // Check for new fact/correction pattern
-        this.checkForNewFact(userInput, response);
-
-        return response;
+        return this.formatResponse(response, style);
     }
 
     detectIntent(input) {
@@ -666,21 +757,21 @@ class NyenzoChatbot {
         const time = now.toLocaleTimeString('en-US', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit' });
         const responses = {
             positive: {
-                simple: `Hi! I'm doing great, thanks! It's ${time} here in Nairobi - perfect timing! What’s on your mind?`,
+                simple: `Hi! I'm doing great, thanks! It's ${time} here in Nairobi - perfect timing! What's on your mind?`,
                 technical: `Greetings! I'm operating optimally, thank you! It's ${time} in Nairobi. Ready for technical inquiries - what would you like to explore?`,
-                casual: `Hey there! I'm feeling awesome, thanks! It's ${time} in Nairobi - late night vibes! What’s up? 😄`,
+                casual: `Hey there! I'm feeling awesome, thanks! It's ${time} in Nairobi - late night vibes! What's up? 😄`,
                 conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi. Nice to chat - how can I assist you?`
             },
             negative: {
                 simple: `Hi! Sorry you might be feeling down. I'm okay, thanks for asking! It's ${time} in Nairobi. Want to talk or switch topics?`,
                 technical: `Greetings! I detect a potential negative sentiment. I'm functioning within parameters, thank you! It's ${time} in Nairobi. How can I assist technically?`,
                 casual: `Hey! Seems like you might be having a rough night - sorry! I'm alright, thanks! It's ${time} in Nairobi. Want to chat or change it up? 😊`,
-                conversational: `Hello! It seems you might be feeling down - I’m sorry. I'm okay, thanks! It's ${time} in Nairobi. How can I help?`
+                conversational: `Hello! It seems you might be feeling down - I'm sorry. I'm okay, thanks! It's ${time} in Nairobi. How can I help?`
             },
             neutral: {
                 simple: `Hi! I'm doing fine, thanks! It's ${time} in Nairobi. How can I assist you?`,
                 technical: `Greetings! I'm operating at standard efficiency, thank you! It's ${time} in Nairobi. What technical topic interests you?`,
-                casual: `Hey! I'm doing okay, thanks! It's ${time} here in Nairobi. What’s on your mind? 😊`,
+                casual: `Hey! I'm doing okay, thanks! It's ${time} here in Nairobi. What's on your mind? 😊`,
                 conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi. How can I help you?`
             }
         };
@@ -691,22 +782,36 @@ class NyenzoChatbot {
     }
 
     handleSkillQuestion(input) {
+        // Handle domain-specific questions with context awareness
+        if (input.includes('domain')) {
+            const lastUserMsg = this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase() : '';
+            if (lastUserMsg.includes('expertise') || lastUserMsg.includes('skill') || lastUserMsg.includes('proficient') || lastUserMsg.includes('experienced')) {
+                const domains = this.knowledgeBase.personal.domains || ["Finance", "Healthcare Technology", "Business Intelligence", "Marketing"];
+                const responses = {
+                    simple: `I have experience in several domains: ${domains.join(', ')}.`,
+                    technical: `I have hands-on experience in domains such as ${domains.join(', ')}. My work spans finance, healthcare technology, business intelligence, and marketing, applying data science and AI to solve real-world problems in each.`,
+                    casual: `I've worked in a bunch of areas: ${domains.join(', ')}. Each one's been a cool adventure! 😊`,
+                    conversational: `I have experience in several domains, including ${domains.join(', ')}. I enjoy applying my skills to different industries and challenges.`
+                };
+                this.followUpQuestion = "Want to hear about a project in one of these domains?";
+                return responses[this.responseStyle] || responses.conversational;
+            }
+        }
         if (input.includes('python')) {
             const responses = {
-                simple: `Thanks for asking! Python is my go-to language - I use it for data science, AI, and web apps. It’s like my coding superpower!`,
-                technical: `Great question! Python is my primary language. I’m confident in it and can adapt quickly. I use it for data science, ML with TensorFlow/PyTorch, and web development with frameworks like Django.`,
-                casual: `Awesome question! Python’s my jam - I use it for AI, data stuff, and web apps. It’s super versatile! Fun fact: Python was named after Monty Python! 😂`,
-                conversational: `Thanks for asking! Python is my main language - I’m very confident with it. I use it for data science, machine learning, and web development projects.`
+                simple: `Thanks for asking! Python is my go-to language - I use it for data science, AI, and web apps. It's like my coding superpower!`,
+                technical: `Great question! Python is my primary language. I'm confident in it and can adapt quickly. I use it for data science, ML with TensorFlow/PyTorch, and web development with frameworks like Django.`,
+                casual: `Awesome question! Python's my jam - I use it for AI, data stuff, and web apps. It's super versatile! Fun fact: Python was named after Monty Python! 😂`,
+                conversational: `Thanks for asking! Python is my main language - I'm very confident with it. I use it for data science, machine learning, and web development projects.`
             };
-            this.followUpQuestion = "Want to hear about a Python project I’ve worked on?";
+            this.followUpQuestion = "Want to hear about a Python project I've worked on?";
             return responses[this.responseStyle] || responses.conversational;
         }
-        // ... (other skill handlers remain similar, adjusted for brevity)
         else if (input.includes('certification') || input.includes('certified')) {
             const responses = {
                 simple: `Nice question! I have certifications in Huawei AI and ALX Software Engineering. They keep me sharp in AI and coding!`,
                 technical: `Thanks for asking! I hold certifications in Huawei AI Development Framework (Feb 2025 - Jun 2025) and ALX Software Engineering (Feb 2023 - Apr 2024), covering AI deployment and full-stack development.`,
-                casual: `Great question! I’ve got Huawei AI and ALX Software Engineering certifications - like tech badges! 😄 They’re super helpful!`,
+                casual: `Great question! I've got Huawei AI and ALX Software Engineering certifications - like tech badges! 😄 They're super helpful!`,
                 conversational: `Thanks for asking! I have certifications in Huawei AI Development Framework and ALX Software Engineering, which boost my skills in AI and software engineering.`
             };
             this.followUpQuestion = "Interested in how I used these in a project?";
@@ -714,10 +819,10 @@ class NyenzoChatbot {
         }
         else {
             const responses = {
-                simple: `Good question! I’m skilled in Python, JavaScript, machine learning, and web development. Always learning new stuff!`,
-                technical: `Thanks for asking! I excel in Python, JavaScript, ML with TensorFlow, and web tech like React. I’ve applied these across finance, healthcare, and more.`,
-                casual: `Cool question! I’m solid with Python, JavaScript, ML, and web dev. Always picking up new tricks! 😊`,
-                conversational: `Thanks for asking! I’m proficient in Python, JavaScript, machine learning, and web development, with experience in various domains.`
+                simple: `Good question! I'm skilled in Python, JavaScript, machine learning, and web development. Always learning new stuff!`,
+                technical: `Thanks for asking! I excel in Python, JavaScript, ML with TensorFlow, and web tech like React. I've applied these across finance, healthcare, and more.`,
+                casual: `Cool question! I'm solid with Python, JavaScript, ML, and web dev. Always picking up new tricks! 😊`,
+                conversational: `Thanks for asking! I'm proficient in Python, JavaScript, machine learning, and web development, with experience in various domains.`
             };
             this.followUpQuestion = "Which skill would you like to explore more?";
             return responses[this.responseStyle] || responses.conversational;
@@ -818,7 +923,7 @@ class NyenzoChatbot {
                 const responses = {
                     simple: `The tender dashboard project analyzed bidding data to help businesses improve their success rates. I built a web dashboard to visualize trends and key metrics.`,
                     technical: `For the tender dashboard, I collected and analyzed bidding data, then built a web dashboard using React and D3.js. The dashboard visualizes win rates, bid amounts, and trends to help organizations optimize their bidding strategies.`,
-                    casual: `This project was about helping companies win more bids! I made a dashboard that shows what works and what doesn’t. Built it with React and D3.`,
+                    casual: `This project was about helping companies win more bids! I made a dashboard that shows what works and what doesn't. Built it with React and D3.`,
                     conversational: `The tender dashboard project helps businesses analyze their bidding performance. I built a web dashboard to visualize trends and key metrics. Want to know about the data sources or the visualizations?`
                 };
                 this.followUpQuestion = "Want to know about the data sources or the visualizations?";
@@ -827,7 +932,7 @@ class NyenzoChatbot {
                 const responses = {
                     simple: `I can share more about my projects! For example, Aivestor is an AI investment advisor, and I also built a dashboard for analyzing tender bidding success rates. Which one would you like to hear more about?`,
                     technical: `I have several projects, including Aivestor (an AI investment advisor using ML models) and a tender bidding dashboard (built with React and D3.js). Let me know which one you want to dive into!`,
-                    casual: `Sure! I’ve got Aivestor (AI for investing) and a dashboard for tender bids. Which sounds interesting?`,
+                    casual: `Sure! I've got Aivestor (AI for investing) and a dashboard for tender bids. Which sounds interesting?`,
                     conversational: `I have a few projects I can tell you more about, like Aivestor or my tender dashboard. Which one would you like to hear about?`
                 };
                 this.followUpQuestion = "Which project would you like to dive into?";
@@ -919,27 +1024,27 @@ class NyenzoChatbot {
         const responses = {
             simple: [
                 "Happy to help! Ask about my skills, projects, or experience.",
-                "Interesting! I work with data science, AI, and web dev. What’s your interest?",
+                "Interesting! I work with data science, AI, and web dev. What's your interest?",
                 "I can share my background or projects. I love building innovative solutions!",
-                "Great! I’ve done AI systems and web platforms. What catches your eye?"
+                "Great! I've done AI systems and web platforms. What catches your eye?"
             ],
             technical: [
                 "I can detail my technical skills or projects. What specific area interests you?",
                 "I have deep experience in data science and AI. Which domain would you like to dive into?",
                 "I offer insights into my tech background and portfolio. What would you like to explore?",
-                "I’ve built AI apps and trading systems. Which area would you like to know more about?"
+                "I've built AI apps and trading systems. Which area would you like to know more about?"
             ],
             casual: [
-                "Sure! Ask me about skills or projects - I’m an open book! 😊",
+                "Sure! Ask me about skills or projects - I'm an open book! 😊",
                 "Cool! I do data science, AI, and web stuff. What do you want to chat about?",
-                "I can tell you about my background or cool projects I’ve worked on!",
-                "Nice! I’ve got AI and web projects. What sounds fun to you?"
+                "I can tell you about my background or cool projects I've worked on!",
+                "Nice! I've got AI and web projects. What sounds fun to you?"
             ],
             conversational: [
                 "Happy to help! Ask about my skills, projects, or experience.",
                 "Interesting! I work with data science, AI, and web dev. What would you like to know?",
                 "I can share my background or projects. I love building innovative solutions!",
-                "Great! I’ve done AI systems and web platforms. What interests you?"
+                "Great! I've done AI systems and web platforms. What interests you?"
             ]
         };
         
@@ -957,7 +1062,7 @@ class NyenzoChatbot {
 
         const contentElem = document.createElement('div');
         contentElem.className = 'message-content ' + (message.type === 'user' ? 'right' : 'left');
-        contentElem.style.flexDirection = 'column'; // Ensure vertical stacking
+        contentElem.style.flexDirection = 'column';
         contentElem.style.alignItems = 'center';
 
         if (message.type === 'bot') {
@@ -966,7 +1071,7 @@ class NyenzoChatbot {
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
             contentElem.appendChild(bubble);
 
-            // Add feedback buttons BELOW the bubble
+            // Add feedback buttons below message bubble
             const feedbackContainer = document.createElement('div');
             feedbackContainer.style.display = 'flex';
             feedbackContainer.style.gap = '8px';
@@ -979,7 +1084,7 @@ class NyenzoChatbot {
             `;
             contentElem.appendChild(feedbackContainer);
 
-            // Timestamp BELOW feedback
+            // Add timestamp below feedback
             const timestampElem = document.createElement('div');
             timestampElem.className = 'message-timestamp';
             const now = new Date();
@@ -990,7 +1095,7 @@ class NyenzoChatbot {
             bubble.className = 'message-bubble';
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
             contentElem.appendChild(bubble);
-            // Timestamp for user message
+            
             const timestampElem = document.createElement('div');
             timestampElem.className = 'message-timestamp';
             const now = new Date();
@@ -1002,7 +1107,7 @@ class NyenzoChatbot {
         messagesContainer.appendChild(messageElem);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // Feedback event
+        // Handle feedback events for bot messages
         if (message.type === 'bot') {
             const feedbackBtns = messageElem.querySelectorAll('.chatbot-feedback-btn');
             feedbackBtns.forEach(btn => {
@@ -1020,7 +1125,7 @@ class NyenzoChatbot {
         }
     }
 
-    // Model persistence
+    // Persist model state to localStorage
     saveModelToStorage() {
         const state = {
             vocabulary: Array.from(this.mlModel.vocabulary),
@@ -1042,7 +1147,7 @@ class NyenzoChatbot {
         }
     }
 
-    // Call saveModelToStorage every 10 interactions and on window unload
+    // Auto-save model every 10 interactions
     trackPersistence() {
         let saveCounter = 0;
         const saveIfNeeded = () => {
@@ -1058,9 +1163,8 @@ class NyenzoChatbot {
         })(this.addMessage.bind(this));
     }
 
-    // Dynamic knowledge base expansion
+    // Expand knowledge base with user-provided facts
     checkForNewFact(userInput, botResponse) {
-        // Simple pattern: "Remember that ..." or "My ... is ..."
         const rememberMatch = userInput.match(/remember that (.+)/i);
         const myFactMatch = userInput.match(/my ([a-zA-Z ]+) is ([a-zA-Z0-9 ,.'-]+)/i);
         if (rememberMatch) {
@@ -1146,7 +1250,7 @@ class NyenzoChatbot {
     }
 }
 
-// Initialize chatbot when DOM is loaded
+// Initialize chatbot
 document.addEventListener('DOMContentLoaded', () => {
     new NyenzoChatbot();
 });

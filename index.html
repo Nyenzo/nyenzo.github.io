@@ -262,41 +262,18 @@
                 <div class="section-underline"></div>
                 <p class="section-subtitle">Let's work together</p>
             </div>
-            <div class="contact-container">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="contact-text">
-                            <h3>Email</h3>
-                            <p><a href="mailto:nyenzoisabwa@gmail.com">nyenzoisabwa@gmail.com</a></p>
-                        </div>
-                    </div>
-                    <div class="social-links">
-                        <a href="https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/" class="social-link" target="_blank"><i class="fab fa-linkedin"></i></a>
-                        <a href="https://github.com/Nyenzo" class="social-link" target="_blank"><i class="fab fa-github"></i></a>
-                        <a href="https://twitter.com/NyenzoI" class="social-link" target="_blank"><i class="fab fa-twitter"></i></a>
-                    </div>
+            <form action="https://formspree.io/f/xrbkvjgj" method="POST" class="contact-form">
+                <div class="form-group">
+                    <input type="text" name="name" placeholder="Your Name" required>
                 </div>
-                <div class="contact-form-container">
-                    <form class="contact-form">
-                        <div class="form-group">
-                            <label for="name">Name</label>
-                            <input type="text" id="name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Message</label>
-                            <textarea id="message" name="message" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary submit-btn">Send Message</button>
-                    </form>
+                <div class="form-group">
+                    <input type="email" name="email" placeholder="Your Email" required>
                 </div>
-            </div>
+                <div class="form-group">
+                    <textarea name="message" placeholder="Your Message" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Send Message</button>
+            </form>
         </div>
     </section>
 

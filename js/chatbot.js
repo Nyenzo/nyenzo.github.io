@@ -129,8 +129,10 @@ class NyenzoChatbot {
         this.followUpQuestion = null;
         this.mlModel = new SentimentModel();
         this.learningMode = true;
-        this.currentStyle = 'professional'; // professional, casual, technical, friendly
+        this.currentStyle = 'professional';
         this.styleCounter = 0;
+        this.lastProject = null; // Track last discussed project
+        this.lastTopic = null; // Track last discussed topic
         this.init();
     }
 
@@ -659,9 +661,10 @@ class NyenzoChatbot {
         const input = userInput.toLowerCase();
         this.conversationHistory.push({ user: userInput, timestamp: new Date() });
 
-        const intent = this.detectIntent(input);
-        const sentiment = this.analyzeSentiment(userInput);
-        const style = this.getResponseStyle();
+        // Handle greetings
+        if (this.isGreeting(input)) {
+            return this.handleGreeting(input);
+        }
 
         // Sensitive personal questions
         const sensitivePersonalPatterns = [
@@ -671,37 +674,59 @@ class NyenzoChatbot {
             return "Hehe. I don't like talking about myself over the internet. I would however be happy to indulge and answer personal questions in person. Feel free to reach out to me.";
         }
 
-        // Generate personalized response using ML model
-        const context = { sentiment, intent, style, lastUser: this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user : null };
-        const mlResponse = this.mlModel.generatePersonalizedResponse(userInput, context);
-        
-        if (mlResponse && this.learningMode) {
-            this.mlModel.learnFromInteraction(userInput, mlResponse);
-            return this.formatResponse(mlResponse, style);
-        }
-
-        // Generate enhanced response using knowledge base
-        let response = this.generateEnhancedResponse(userInput, context);
-        
-        if (!response) {
-            // Fallback to intent-based response handlers
-            if (this.isGreeting(input)) {
-                response = this.handleGreeting(input);
-            } else if (intent === 'skill' || this.isSkillQuestion(input)) {
-                response = this.handleSkillQuestion(input);
-            } else if (intent === 'project' || this.isProjectQuestion(input)) {
-                response = this.handleProjectQuestion(input);
-            } else if (intent === 'personal' || this.isPersonalQuestion(input)) {
-                response = this.handlePersonalQuestion(input);
-            } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
-                response = this.handleInterviewQuestion(input);
-            } else {
-                // Fallback for unknown questions
-                response = `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
+        // Q&A matching from training prompts
+        const qaMatch = this.fuzzyMatchTrainingPrompt(input);
+        if (qaMatch) {
+            // Track last topic/project if relevant
+            if (input.includes('project') || input.includes('aivestor') || input.includes('trading bot') || input.includes('tule initiative') || input.includes('pregnancy outcomes')) {
+                this.lastProject = input;
+                this.lastTopic = input;
             }
+            return qaMatch;
         }
 
-        return this.formatResponse(response, style);
+        // Contextual follow-up for 'tell me more' or 'more details'
+        if (/tell me more|more details|can you elaborate|explain more|give me more info/.test(input)) {
+            if (this.lastProject) {
+                // Provide deeper details from knowledge base
+                const projectMap = {
+                    'aivestor': this.knowledgeBase.projects.aivestor,
+                    'trading bot': this.knowledgeBase.projects.tradingBot,
+                    'tule initiative': this.knowledgeBase.projects.tuleInitiative,
+                    'pregnancy outcomes': this.knowledgeBase.projects.pregnancyOutcomes
+                };
+                for (const key in projectMap) {
+                    if (this.lastProject.includes(key)) {
+                        const proj = projectMap[key];
+                        return `${proj.name}: ${proj.description} Key features: ${proj.features ? proj.features.join('; ') : ''} Impact: ${proj.impact || proj.achievement || ''}`;
+                    }
+                }
+            }
+            if (this.lastTopic) {
+                return `Here's more about ${this.lastTopic}: ${this.knowledgeBase.personal.background}`;
+            }
+            return "Could you clarify what you'd like to know more about?";
+        }
+
+        // Knowledge base fallback for education, background, etc.
+        if (input.includes('study') || input.includes('university') || input.includes('college') || input.includes('degree') || input.includes('education')) {
+            const edu = this.knowledgeBase.education;
+            return `I studied at ${edu.institution} and completed my ${edu.degree} (${edu.duration}).`;
+        }
+        if (input.includes('project')) {
+            const projects = Object.values(this.knowledgeBase.projects).map(p => p.name).join(', ');
+            return `Some of my notable projects are: ${projects}. Ask about any for more details!`;
+        }
+        if (input.includes('background')) {
+            return this.knowledgeBase.personal.background;
+        }
+        if (input.includes('skills') || input.includes('technologies')) {
+            const skills = Object.keys(this.knowledgeBase.skills.programming).join(', ');
+            return `My key technical skills include: ${skills}.`;
+        }
+
+        // Fallback for unknown questions
+        return `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
     }
 
     detectIntent(input) {
@@ -1249,6 +1274,50 @@ class NyenzoChatbot {
                 }
             }
         });
+    }
+
+    // Fuzzy Q&A matching using training prompts
+    fuzzyMatchTrainingPrompt(input) {
+        const normalizedInput = input.toLowerCase();
+        // Synonym map for common questions
+        const synonyms = {
+            'where did you study': 'educational background',
+            'what university': 'educational background',
+            'which university': 'educational background',
+            'which college': 'educational background',
+            'what college': 'educational background',
+            'what is your degree': 'educational background',
+            'your degree': 'educational background',
+            'where are you from': 'where are you from',
+            'what is your name': 'what\'s your name',
+            'who are you': 'what\'s your name',
+            'tell me about your projects': 'projects',
+            'tell me about your work': 'projects',
+            'what projects': 'projects',
+            'your projects': 'projects',
+            'project': 'projects',
+            'aivestor': 'aivestor',
+            'trading bot': 'trading bot',
+            'tule initiative': 'tule initiative',
+            'pregnancy outcomes': 'pregnancy outcomes',
+        };
+        // Try direct match
+        for (const [key, value] of Object.entries(this.trainingPrompts)) {
+            if (normalizedInput === key) return value;
+        }
+        // Try synonym match
+        for (const [syn, canonical] of Object.entries(synonyms)) {
+            if (normalizedInput.includes(syn)) {
+                for (const [key, value] of Object.entries(this.trainingPrompts)) {
+                    if (key.includes(canonical)) return value;
+                }
+            }
+        }
+        // Try partial/fuzzy match
+        for (const [key, value] of Object.entries(this.trainingPrompts)) {
+            if (normalizedInput.includes(key)) return value;
+        }
+        return null;
     }
 }
 

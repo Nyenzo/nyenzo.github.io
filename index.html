@@ -208,7 +208,7 @@
                                     <a href="https://github.com/Nyenzo/aivestor-ai" target="_blank" class="project-link" aria-label="View Aivestor AI project on GitHub (opens in new tab)">
                                         <i class="fab fa-github" aria-hidden="true"></i> GitHub
                                 </a>
-                                <button class="btn btn-secondary more-info-btn" data-modal="aivestor-modal" type="button">More Info</button>
+                                <button class="btn btn-secondary more-info-btn" data-project="aivestor" type="button">More Info</button>
                             </div>
                         </div>
                     </article>
@@ -227,7 +227,7 @@
                                     <a href="https://github.com/Nyenzo/Trading-bot" class="project-link" aria-label="View trading bot project details">
                                         <i class="fas fa-external-link-alt" aria-hidden="true"></i> View Details
                                 </a>
-                                <button class="btn btn-secondary more-info-btn" data-modal="tradingbot-modal" type="button">More Info</button>
+                                <button class="btn btn-secondary more-info-btn" data-project="tradingbot" type="button">More Info</button>
                             </div>
                         </div>
                     </article>
@@ -246,7 +246,7 @@
                                     <a href="#" class="project-link" aria-label="View Tule Initiative website">
                                         <i class="fas fa-external-link-alt" aria-hidden="true"></i> View Website
                                 </a>
-                                <button class="btn btn-secondary more-info-btn" data-modal="tule-modal" type="button">More Info</button>
+                                <button class="btn btn-secondary more-info-btn" data-project="tule" type="button">More Info</button>
                             </div>
                         </div>
                     </article>
@@ -305,7 +305,7 @@
                     </div>
 
                 <div class="contact-form-container">
-                        <form class="contact-form" action="https://formspree.io/f/xpzgwqzg" method="POST" aria-labelledby="contact-form-title">
+                        <form class="contact-form" action="https://formspree.io/f/xzzgqobe" method="POST" aria-labelledby="contact-form-title">
                             <h3 id="contact-form-title">Send me a message</h3>
                         <div class="form-group">
                             <label for="name">Name</label>
@@ -378,5 +378,86 @@
             });
         });
     </script>
+<!-- Aivestor Modal -->
+<div id="aivestor-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="-1">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <h2>Aivestor - AI Investment Advisor</h2>
+    <p>
+      Aivestor AI is an advanced investment advisory system that combines machine learning, sentiment analysis, and economic indicators to provide intelligent stock market predictions and portfolio recommendations. It achieved over 90% accuracy on real-world data.
+    </p>
+    <h3>Features</h3>
+    <ul>
+      <li>Personalized investment advice</li>
+      <li>Real-time market data integration</li>
+      <li>Sentiment analysis from news and social media</li>
+      <li>Portfolio optimization</li>
+      <li>Comprehensive backtesting</li>
+    </ul>
+    <h3>Tech Stack</h3>
+    <ul>
+      <li>Python (scikit-learn, pandas, NumPy)</li>
+      <li>APIs: Alpha Vantage, FRED</li>
+      <li>Frontend: React.js</li>
+      <li>Backend: Flask</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Trading Bot Modal -->
+<div id="tradingbot-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="-1">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <h2>Algorithmic Trading Bot</h2>
+    <p>
+      My algorithmic trading bot combines technical analysis with machine learning to predict market movements in forex and gold markets. It operates during East Africa Time market hours and integrates multiple data sources for comprehensive analysis.
+    </p>
+    <h3>Features</h3>
+    <ul>
+      <li>Automated trading for forex and gold</li>
+      <li>Technical indicators: Moving Averages, RSI, MACD, Bollinger Bands, Volume</li>
+      <li>Real-time data collection and analysis</li>
+      <li>Machine learning-based predictions</li>
+      <li>Backtesting and performance tracking</li>
+    </ul>
+    <h3>Tech Stack</h3>
+    <ul>
+      <li>Python (TA-Lib, pandas, scikit-learn)</li>
+      <li>APIs: yfinance, Alpha Vantage</li>
+      <li>Deployment: Custom scripts, cloud hosting</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Tule Initiative Modal -->
+<div id="tule-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="-1">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <h2>Tule Initiative Website</h2>
+    <p>
+      The Tule Initiative is a community-driven website I built using Next.js. It features server-side rendering for better SEO, dynamic content integration with Firebase, and includes an admin dashboard for community management.
+    </p>
+    <h3>Features</h3>
+    <ul>
+      <li>Community-driven content management</li>
+      <li>Admin dashboard for moderators</li>
+      <li>Server-side rendering for SEO</li>
+      <li>Dynamic content with Firebase</li>
+      <li>Responsive, modern UI</li>
+    </ul>
+    <h3>Tech Stack</h3>
+    <ul>
+      <li>Next.js (React)</li>
+      <li>Firebase (database, auth)</li>
+      <li>HTML5, CSS3, JavaScript</li>
+    </ul>
+  </div>
+</div>
+<div id="project-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="-1">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <div class="modal-body"></div>
+  </div>
+</div>
 </body>
 </html>

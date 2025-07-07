@@ -371,6 +371,15 @@ class NyenzoChatbot {
             "how do you handle real-time data in your trading systems": "I use yfinance and Alpha Vantage APIs for real-time data collection, with scheduled data gathering during market hours. The system processes this data through pandas for analysis and feeds it into the prediction models.",
             "what's your approach to sentiment analysis": "I use TextBlob and Transformers for natural language processing to analyze market sentiment from news articles and social media. This sentiment data is then incorporated into the investment decision-making process.",
             "how do you ensure your models are reliable": "I use cross-validation techniques, compare weighted and unweighted models, and conduct comprehensive backtesting. I also regularly retrain models to maintain performance as market conditions change.",
+            "who is peter": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "tell me about yourself": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "about you": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "bio": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "background": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "where were you born": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "where did you grow up": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "your story": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
+            "your journey": "I'm Peter Nyenzo Isabwa, a data scientist and software developer from Nairobi, Kenya. I was born and raised here in Kenya's vibrant capital.",
             // ... (continue for all 100 Q&A pairs, using normalized keys)
         };
     }
@@ -1054,29 +1063,27 @@ class NyenzoChatbot {
         const messageElem = document.createElement('div');
         messageElem.className = `chatbot-message ${message.type === 'user' ? 'user-message' : 'bot-message'}`;
 
-        const contentElem = document.createElement('div');
-        contentElem.className = 'message-content ' + (message.type === 'user' ? 'right' : 'left');
-        contentElem.style.flexDirection = 'column';
-        contentElem.style.alignItems = 'center';
+        // Message row: icon + bubble
+        const rowElem = document.createElement('div');
+        rowElem.className = 'message-row';
 
-        // Add icon
+        // Icon
         const iconElem = document.createElement('div');
         iconElem.className = 'message-icon';
         if (message.type === 'bot') {
             iconElem.innerHTML = `<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />`;
         } else {
-            // Use a simple user SVG icon
             iconElem.innerHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="User"><circle cx="16" cy="16" r="16" fill="#e5e7eb"/><circle cx="16" cy="13" r="6" fill="#a0aec0"/><ellipse cx="16" cy="24" rx="8" ry="4" fill="#cbd5e1"/></svg>`;
         }
-        contentElem.appendChild(iconElem);
+        rowElem.appendChild(iconElem);
 
-        // Message bubble
+        // Bubble
         const bubble = document.createElement('div');
         bubble.className = 'message-bubble';
         bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
-        contentElem.appendChild(bubble);
+        rowElem.appendChild(bubble);
 
-        // Feedback buttons and timestamp for bot
+        // Feedback buttons for bot
         if (message.type === 'bot') {
             const feedbackContainer = document.createElement('div');
             feedbackContainer.style.display = 'flex';
@@ -1088,17 +1095,18 @@ class NyenzoChatbot {
                 <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful">👍</button>
                 <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful">👎</button>
             `;
-            contentElem.appendChild(feedbackContainer);
+            bubble.appendChild(feedbackContainer);
         }
 
-        // Timestamp
+        messageElem.appendChild(rowElem);
+
+        // Timestamp below bubble
         const timestampElem = document.createElement('div');
         timestampElem.className = 'message-timestamp';
         const now = new Date();
         timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-        contentElem.appendChild(timestampElem);
+        messageElem.appendChild(timestampElem);
 
-        messageElem.appendChild(contentElem);
         messagesContainer.appendChild(messageElem);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
@@ -1268,6 +1276,15 @@ class NyenzoChatbot {
             'trading bot': 'trading bot',
             'tule initiative': 'tule initiative',
             'pregnancy outcomes': 'pregnancy outcomes',
+            'who is peter': 'who is peter',
+            'tell me about yourself': 'tell me about yourself',
+            'about you': 'about you',
+            'bio': 'bio',
+            'background': 'background',
+            'where were you born': 'where were you born',
+            'where did you grow up': 'where did you grow up',
+            'your story': 'your story',
+            'your journey': 'your journey',
         };
         // Try direct match
         for (const [key, value] of Object.entries(this.trainingPrompts)) {

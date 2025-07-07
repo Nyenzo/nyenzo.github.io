@@ -688,38 +688,18 @@ class NyenzoChatbot {
             } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
                 response = this.handleInterviewQuestion(input);
             } else {
-                // Handle specific questions that don't fit other categories
-                response = this.handleSpecificQuestions(input);
+                // Sentiment-aware fallback with fun facts
+                if (sentiment === 'negative') {
+                    response = "I'm sorry to hear that. If you'd like to talk about it or need support, I'm here to listen. Would you like to share more or talk about something that might help?";
+                } else if (sentiment === 'positive') {
+                    response = "I'm glad to hear that! If you want to share more good news or talk about anything else, I'm here for you.";
+                } else {
+                    response = `You caught me, I currently don't have an answer for that but I will look into it. For now here is a fun fact: ${this.getRandomFunFact()}`;
+                }
             }
         }
 
         return this.formatResponse(response, style);
-    }
-
-    handleSpecificQuestions(input) {
-        // Sensitive personal questions
-        if (
-            input.includes('age') || input.includes('how old') ||
-            input.includes('height') || input.includes('tall') || input.includes('how tall') ||
-            input.includes('weight') || input.includes('birthday') || input.includes('born') ||
-            input.includes('single') || input.includes('married') || input.includes('relationship')
-        ) {
-            return "Hehe. I don't like talking about myself over the internet. I would however be happy to indulge and answer personal questions in person. Feel free to reach out to me.";
-        }
-
-        // Emotional support
-        if (input.includes('sad') || input.includes('depressed') || input.includes('unhappy')) {
-            return "I'm sorry to hear that... I understand. If you'd like to talk about it or need support, I'm here to listen... I understand. Would you like to share more or talk about something that might help?";
-        }
-        if (input.includes('yes') && this.conversationHistory.length > 1) {
-            const lastMessage = this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase();
-            if (lastMessage.includes('sad') || lastMessage.includes('depressed') || lastMessage.includes('unhappy')) {
-                return "I'm here to listen. Sometimes talking helps, and sometimes it's good to focus on something else. Would you like to share what's on your mind, or would you prefer to talk about something completely different?";
-            }
-        }
-
-        // Fallback for unknown topics (e.g. Tesla)
-        return `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
     }
 
     detectIntent(input) {
@@ -817,24 +797,6 @@ class NyenzoChatbot {
                 return responses[this.responseStyle] || responses.conversational;
             }
         }
-        
-        // Handle follow-up questions about education/learning
-        const followUpPhrases = ['tell me more', 'more details', 'elaborate', 'give me more', 'can you elaborate', 'expand', 'explain more', 'go deeper', 'details', 'explain further', 'what did you learn'];
-        const lastUserMsg = this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase() : '';
-        
-        if (followUpPhrases.some(phrase => input.includes(phrase))) {
-            if (lastUserMsg.includes('education') || lastUserMsg.includes('university') || lastUserMsg.includes('jkuat') || lastUserMsg.includes('study') || lastUserMsg.includes('learn')) {
-                const responses = {
-                    simple: `At JKUAT, I focused on Mathematics, Computer Science, Data Analysis, and Machine Learning. I learned programming languages like Python and Java, worked with databases, and completed a research project on pregnancy outcomes prediction. The program gave me a strong foundation in both theoretical concepts and practical applications!`,
-                    technical: `My academic focus at JKUAT included advanced mathematics, algorithms, data structures, machine learning algorithms, statistical analysis, and software engineering principles. I completed coursework in Python, Java, database systems, and conducted research using real-world datasets for my pregnancy outcomes prediction project.`,
-                    casual: `I learned a ton at JKUAT! Math, computer science, data analysis, and machine learning. I got really good at Python and Java, worked with databases, and even did a research project on pregnancy outcomes. Super practical stuff! 😊`,
-                    conversational: `At JKUAT, I studied Mathematics, Computer Science, Data Analysis, and Machine Learning. I learned programming languages like Python and Java, worked with databases, and completed a research project on pregnancy outcomes prediction. The program was very hands-on and practical!`
-                };
-                this.followUpQuestion = "Want to hear about my research project or any specific courses?";
-                return responses[this.responseStyle] || responses.conversational;
-            }
-        }
-        
         if (input.includes('python')) {
             const responses = {
                 simple: `Thanks for asking! Python is my go-to language - I use it for data science, AI, and web apps. It's like my coding superpower!`,
@@ -870,23 +832,6 @@ class NyenzoChatbot {
     handlePersonalQuestion(input) {
         const personalInfo = this.knowledgeBase.personal;
         const educationInfo = this.knowledgeBase.education;
-        
-        // Handle follow-up questions about education/learning
-        const followUpPhrases = ['tell me more', 'more details', 'elaborate', 'give me more', 'can you elaborate', 'expand', 'explain more', 'go deeper', 'details', 'explain further', 'what did you learn'];
-        const lastUserMsg = this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase() : '';
-        
-        if (followUpPhrases.some(phrase => input.includes(phrase))) {
-            if (lastUserMsg.includes('education') || lastUserMsg.includes('university') || lastUserMsg.includes('jkuat') || lastUserMsg.includes('study') || lastUserMsg.includes('learn')) {
-                const responses = {
-                    simple: `At JKUAT, I focused on Mathematics, Computer Science, Data Analysis, and Machine Learning. I learned programming languages like Python and Java, worked with databases, and completed a research project on pregnancy outcomes prediction. The program gave me a strong foundation in both theoretical concepts and practical applications!`,
-                    technical: `My academic focus at JKUAT included advanced mathematics, algorithms, data structures, machine learning algorithms, statistical analysis, and software engineering principles. I completed coursework in Python, Java, database systems, and conducted research using real-world datasets for my pregnancy outcomes prediction project.`,
-                    casual: `I learned a ton at JKUAT! Math, computer science, data analysis, and machine learning. I got really good at Python and Java, worked with databases, and even did a research project on pregnancy outcomes. Super practical stuff! 😊`,
-                    conversational: `At JKUAT, I studied Mathematics, Computer Science, Data Analysis, and Machine Learning. I learned programming languages like Python and Java, worked with databases, and completed a research project on pregnancy outcomes prediction. The program was very hands-on and practical!`
-                };
-                this.followUpQuestion = "Want to hear about my research project or any specific courses?";
-                return responses[this.responseStyle] || responses.conversational;
-            }
-        }
         
         if (input.includes('hobbies') || input.includes('hobby')) {
             const responses = {
@@ -951,15 +896,10 @@ class NyenzoChatbot {
         const followUpPhrases = ['tell me more', 'more details', 'elaborate', 'give me more', 'can you elaborate', 'expand', 'explain more', 'go deeper', 'details', 'explain further'];
         const lastUserMsg = this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase() : '';
         let lastProject = null;
-        
-        // Determine the last project discussed
         if (lastUserMsg.includes('aivestor')) lastProject = 'aivestor';
         else if (lastUserMsg.includes('pregnancy')) lastProject = 'pregnancy';
         else if (lastUserMsg.includes('tender')) lastProject = 'tender';
         else if (lastUserMsg.includes('project')) lastProject = 'project';
-        else if (lastUserMsg.includes('other')) lastProject = 'other';
-        
-        // Handle follow-up questions
         if (followUpPhrases.some(phrase => input.includes(phrase)) && lastProject) {
             if (lastProject === 'aivestor') {
                 const responses = {
@@ -997,19 +937,8 @@ class NyenzoChatbot {
                 };
                 this.followUpQuestion = "Which project would you like to dive into?";
                 return responses[this.responseStyle] || responses.conversational;
-            } else if (lastProject === 'other') {
-                const responses = {
-                    simple: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`,
-                    technical: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`,
-                    casual: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`,
-                    conversational: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`
-                };
-                this.followUpQuestion = "Which project would you like to hear more about?";
-                return responses[this.responseStyle] || responses.conversational;
             }
         }
-        
-        // Handle specific project questions
         if (input.includes('pregnancy')) {
             const responses = {
                 simple: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`,
@@ -1017,7 +946,7 @@ class NyenzoChatbot {
                 casual: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`,
                 conversational: `I developed a decision tree-based machine learning model to predict adverse pregnancy outcomes using the 2022 Kenya Demographic and Health Survey (KDHS) dataset. This research project aimed to identify risk patterns and provide actionable insights for targeted maternal healthcare interventions in Kenya.`
             };
-            this.followUpQuestion = "Want to know more about the data or the model?";
+            this.followUpQuestion = "What's your favorite programming language?";
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('aivestor')) {
             const responses = {
@@ -1026,7 +955,7 @@ class NyenzoChatbot {
                 casual: `I developed an AI investment advisor featuring an advanced stock predictor. This project aimed to provide real-time market data analysis and AI-powered investment recommendations to help users make informed decisions in the stock market.`,
                 conversational: `I developed an AI investment advisor featuring an advanced stock predictor. This project aimed to provide real-time market data analysis and AI-powered investment recommendations to help users make informed decisions in the stock market.`
             };
-            this.followUpQuestion = "Want to know more about the AI models or the tech stack?";
+            this.followUpQuestion = "What's your favorite programming language?";
             return responses[this.responseStyle] || responses.conversational;
         } else if (input.includes('tender')) {
             const responses = {
@@ -1035,7 +964,7 @@ class NyenzoChatbot {
                 casual: `I created a dashboard for analyzing tender bidding success rates. This tool helped businesses and organizations track their success rates and identify areas for strategic improvements in tender bidding.`,
                 conversational: `I created a dashboard for analyzing tender bidding success rates. This tool helped businesses and organizations track their success rates and identify areas for strategic improvements in tender bidding.`
             };
-            this.followUpQuestion = "Want to know more about the dashboard features?";
+            this.followUpQuestion = "What's your favorite programming language?";
             return responses[this.responseStyle] || responses.conversational;
         } else {
             const responses = {
@@ -1044,7 +973,7 @@ class NyenzoChatbot {
                 casual: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`,
                 conversational: `I've worked on several projects, including an AI investment advisor and a tender bidding success rate analysis dashboard. I'm always eager to tackle new challenges and create innovative solutions!`
             };
-            this.followUpQuestion = "Which project would you like to hear more about?";
+            this.followUpQuestion = "What's your favorite programming language?";
             return responses[this.responseStyle] || responses.conversational;
         }
     }
@@ -1137,12 +1066,6 @@ class NyenzoChatbot {
         contentElem.style.alignItems = 'center';
 
         if (message.type === 'bot') {
-            // Bot message with icon
-            const iconContainer = document.createElement('div');
-            iconContainer.className = 'message-icon';
-            iconContainer.innerHTML = '<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" />';
-            contentElem.appendChild(iconContainer);
-
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
@@ -1168,12 +1091,6 @@ class NyenzoChatbot {
             timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             contentElem.appendChild(timestampElem);
         } else {
-            // User message with icon
-            const iconContainer = document.createElement('div');
-            iconContainer.className = 'message-icon';
-            iconContainer.innerHTML = '<img src="assets/images/user-icon.svg" alt="User" />';
-            contentElem.appendChild(iconContainer);
-            
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;

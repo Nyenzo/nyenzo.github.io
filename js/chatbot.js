@@ -738,24 +738,33 @@ class NyenzoChatbot {
         const input = userInput.toLowerCase();
         this.conversationHistory.push({ user: userInput, timestamp: new Date() });
 
+        // Fallback for personal questions
+        if (/(age|how old|height|tall|weight|personal|your age|your height|marital|relationship|family|personal life)/.test(input)) {
+            return "Hehe. I don't like talking about myself over the internet. I would however be happy to indulge and answer personal questions in person. Feel free to reach out to me!";
+        }
+
+        // Context-aware follow-up for studies/education
+        const followUpPhrases = ['tell me more', 'more details', 'elaborate', 'give me more', 'can you elaborate', 'expand', 'explain more', 'go deeper', 'details', 'explain further', 'what did you learn'];
+        if (followUpPhrases.some(phrase => input.includes(phrase))) {
+            for (let i = this.conversationHistory.length - 2; i >= 0; i--) {
+                const prev = this.conversationHistory[i].user.toLowerCase();
+                if (prev.includes('study') || prev.includes('education') || prev.includes('university') || prev.includes('school') || prev.includes('college') || prev.includes('degree')) {
+                    return `At JKUAT, I focused on Mathematics, Computer Science, Data Analysis, and Machine Learning. I learned programming languages like Python and Java, worked with databases, and completed a research project on pregnancy outcomes prediction. The program gave me a strong foundation in both theoretical concepts and practical applications!`;
+                }
+            }
+        }
+
         const intent = this.detectIntent(input);
         const sentiment = this.analyzeSentiment(userInput);
         const style = this.getResponseStyle();
-
-        // Generate personalized response using ML model
         const context = { sentiment, intent, style };
         const mlResponse = this.mlModel.generatePersonalizedResponse(userInput, context);
-        
         if (mlResponse && this.learningMode) {
             this.mlModel.learnFromInteraction(userInput, mlResponse);
             return this.formatResponse(mlResponse, style);
         }
-
-        // Generate enhanced response using knowledge base
         let response = this.generateEnhancedResponse(userInput, context);
-        
         if (!response) {
-            // Fallback to intent-based response handlers
             if (this.isGreeting(input)) {
                 response = this.handleGreeting(input);
             } else if (intent === 'skill' || this.isSkillQuestion(input)) {
@@ -767,11 +776,10 @@ class NyenzoChatbot {
             } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
                 response = this.handleInterviewQuestion(input);
             } else {
-                // Handle specific questions that don't fit other categories
-                response = this.handleSpecificQuestions(input);
+                // Fallback for unknowns: always use fun fact fallback
+                response = `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
             }
         }
-
         return this.formatResponse(response, style);
     }
 
@@ -1222,71 +1230,42 @@ class NyenzoChatbot {
 
         const contentElem = document.createElement('div');
         contentElem.className = 'message-content ' + (message.type === 'user' ? 'right' : 'left');
-        contentElem.style.flexDirection = 'column';
-        contentElem.style.alignItems = 'center';
+        contentElem.style.flexDirection = 'row';
+        contentElem.style.alignItems = 'flex-end';
+        contentElem.style.justifyContent = message.type === 'user' ? 'flex-end' : 'flex-start';
 
+        // Icon
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'message-icon';
+        iconContainer.setAttribute('aria-hidden', 'true');
+        iconContainer.innerHTML = message.type === 'user'
+            ? '<img src="assets/images/user-icon.svg" alt="User" />'
+            : '<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" />';
+
+        // Bubble
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.setAttribute('role', 'text');
+        bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
+
+        // Timestamp
+        const timestampElem = document.createElement('div');
+        timestampElem.className = 'message-timestamp';
+        timestampElem.setAttribute('aria-label', 'Message timestamp');
+        const now = new Date();
+        timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        timestampElem.style.alignSelf = message.type === 'user' ? 'flex-end' : 'flex-start';
+        timestampElem.style.margin = message.type === 'user' ? '0 0 0 8px' : '0 8px 0 0';
+
+        // Order: bot = icon, bubble, timestamp; user = timestamp, bubble, icon (right)
         if (message.type === 'bot') {
-            // Bot message with icon
-            const iconContainer = document.createElement('div');
-            iconContainer.className = 'message-icon';
-            iconContainer.setAttribute('aria-hidden', 'true');
-            iconContainer.innerHTML = '<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" />';
             contentElem.appendChild(iconContainer);
-
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.setAttribute('role', 'text');
-            bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
             contentElem.appendChild(bubble);
-
-            // Add feedback buttons below message bubble
-            const feedbackContainer = document.createElement('div');
-            feedbackContainer.style.display = 'flex';
-            feedbackContainer.style.gap = '8px';
-            feedbackContainer.style.marginTop = '0px';
-            feedbackContainer.style.marginBottom = '2px';
-            feedbackContainer.style.justifyContent = 'center';
-            feedbackContainer.setAttribute('role', 'group');
-            feedbackContainer.setAttribute('aria-label', 'Rate this response');
-            feedbackContainer.innerHTML = `
-                <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful" aria-label="Mark as helpful">
-                    <span aria-hidden="true">👍</span>
-                    <span class="sr-only">Helpful</span>
-                </button>
-                <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful" aria-label="Mark as not helpful">
-                    <span aria-hidden="true">👎</span>
-                    <span class="sr-only">Not helpful</span>
-                </button>
-            `;
-            contentElem.appendChild(feedbackContainer);
-
-            // Add timestamp below feedback
-            const timestampElem = document.createElement('div');
-            timestampElem.className = 'message-timestamp';
-            timestampElem.setAttribute('aria-label', 'Message timestamp');
-            const now = new Date();
-            timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             contentElem.appendChild(timestampElem);
         } else {
-            // User message with icon
-            const iconContainer = document.createElement('div');
-            iconContainer.className = 'message-icon';
-            iconContainer.setAttribute('aria-hidden', 'true');
-            iconContainer.innerHTML = '<img src="assets/images/user-icon.svg" alt="User" />';
-            contentElem.appendChild(iconContainer);
-            
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.setAttribute('role', 'text');
-            bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
-            contentElem.appendChild(bubble);
-            
-            const timestampElem = document.createElement('div');
-            timestampElem.className = 'message-timestamp';
-            timestampElem.setAttribute('aria-label', 'Message timestamp');
-            const now = new Date();
-            timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             contentElem.appendChild(timestampElem);
+            contentElem.appendChild(bubble);
+            contentElem.appendChild(iconContainer);
         }
 
         messageElem.appendChild(contentElem);
@@ -1305,18 +1284,14 @@ class NyenzoChatbot {
                 btn.onclick = (e) => {
                     const feedback = parseInt(btn.getAttribute('data-feedback'));
                     const feedbackText = feedback === 1 ? 'marked as helpful' : 'marked as not helpful';
-                    
                     this.mlModel.learnFromInteraction(
                         this.conversationHistory[this.conversationHistory.length - 1].user,
                         message.content,
                         feedback
                     );
-                    
                     btn.disabled = true;
                     btn.style.opacity = 0.5;
                     btn.setAttribute('aria-label', `${feedbackText} - feedback submitted`);
-                    
-                    // Announce feedback submission
                     this.announceToScreenReader(`Response ${feedbackText}`);
                 };
             });

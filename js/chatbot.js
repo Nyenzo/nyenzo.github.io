@@ -663,8 +663,16 @@ class NyenzoChatbot {
         const sentiment = this.analyzeSentiment(userInput);
         const style = this.getResponseStyle();
 
+        // Sensitive personal questions
+        const sensitivePersonalPatterns = [
+            /how old are you/, /what is your age/, /your age/, /when is your birthday/, /what is your birthday/, /what's your birthday/, /birthday/, /how tall are you/, /what is your height/, /your height/, /height/, /weight/, /how much do you weigh/, /your weight/
+        ];
+        if (sensitivePersonalPatterns.some(re => re.test(input))) {
+            return "Hehe. I don't like talking about myself over the internet. I would however be happy to indulge and answer personal questions in person. Feel free to reach out to me.";
+        }
+
         // Generate personalized response using ML model
-        const context = { sentiment, intent, style };
+        const context = { sentiment, intent, style, lastUser: this.conversationHistory.length > 1 ? this.conversationHistory[this.conversationHistory.length - 2].user : null };
         const mlResponse = this.mlModel.generatePersonalizedResponse(userInput, context);
         
         if (mlResponse && this.learningMode) {
@@ -688,14 +696,8 @@ class NyenzoChatbot {
             } else if (intent === 'interview' || this.isInterviewQuestion(input)) {
                 response = this.handleInterviewQuestion(input);
             } else {
-                // Sentiment-aware fallback with fun facts
-                if (sentiment === 'negative') {
-                    response = "I'm sorry to hear that. If you'd like to talk about it or need support, I'm here to listen. Would you like to share more or talk about something that might help?";
-                } else if (sentiment === 'positive') {
-                    response = "I'm glad to hear that! If you want to share more good news or talk about anything else, I'm here for you.";
-                } else {
-                    response = `You caught me, I currently don't have an answer for that but I will look into it. For now here is a fun fact: ${this.getRandomFunFact()}`;
-                }
+                // Fallback for unknown questions
+                response = `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
             }
         }
 
@@ -754,13 +756,14 @@ class NyenzoChatbot {
     handleGreeting(input) {
         const sentiment = this.analyzeSentiment(input);
         const now = new Date();
-        const time = now.toLocaleTimeString('en-US', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit' });
+        // Get Nairobi time using toLocaleString with EAT
+        const time = now.toLocaleTimeString('en-KE', { timeZone: 'Africa/Nairobi', hour: '2-digit', minute: '2-digit', hour12: false });
         const responses = {
             positive: {
-                simple: `Hi! I'm doing great, thanks! It's ${time} here in Nairobi - perfect timing! What's on your mind?`,
+                simple: `Hi! I'm doing great, thanks! It's ${time} in Nairobi! What's on your mind?`,
                 technical: `Greetings! I'm operating optimally, thank you! It's ${time} in Nairobi. Ready for technical inquiries - what would you like to explore?`,
-                casual: `Hey there! I'm feeling awesome, thanks! It's ${time} in Nairobi - late night vibes! What's up? 😄`,
-                conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi. Nice to chat - how can I assist you?`
+                casual: `Hey there! I'm feeling awesome, thanks! It's ${time} in Nairobi! What's up? 😄`,
+                conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi! 😊 How can I help you?`
             },
             negative: {
                 simple: `Hi! Sorry you might be feeling down. I'm okay, thanks for asking! It's ${time} in Nairobi. Want to talk or switch topics?`,
@@ -771,11 +774,10 @@ class NyenzoChatbot {
             neutral: {
                 simple: `Hi! I'm doing fine, thanks! It's ${time} in Nairobi. How can I assist you?`,
                 technical: `Greetings! I'm operating at standard efficiency, thank you! It's ${time} in Nairobi. What technical topic interests you?`,
-                casual: `Hey! I'm doing okay, thanks! It's ${time} here in Nairobi. What's on your mind? 😊`,
-                conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi. How can I help you?`
+                casual: `Hey! I'm doing okay, thanks! It's ${time} in Nairobi. What's on your mind? 😊`,
+                conversational: `Hello! I'm doing well, thank you! It's ${time} in Nairobi! 😊 How can I help you?`
             }
         };
-
         const styleResponses = responses[sentiment] || responses.neutral;
         this.followUpQuestion = sentiment === 'negative' ? "Would you like to share more or talk about something else?" : "What would you like to dive into next?";
         return styleResponses[this.responseStyle] || styleResponses.conversational;

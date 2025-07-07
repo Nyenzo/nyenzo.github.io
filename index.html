@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nyenzo Isabwa - Data Scientist & Software Engineer | Portfolio</title>
     <meta name="description" content="Experienced Data Scientist and Software Engineer specializing in AI, machine learning, and web development.">
+    <meta name="author" content="Peter Nyenzo Isabwa">
+    <meta name="keywords" content="data scientist, software engineer, AI, machine learning, web development, portfolio">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://nyenzo.github.io">
+    <meta property="og:title" content="Nyenzo Isabwa - Data Scientist & Software Engineer">
+    <meta property="og:description" content="Experienced Data Scientist and Software Engineer specializing in AI, machine learning, and web development.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://nyenzo.github.io">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Nyenzo Isabwa - Data Scientist & Software Engineer">
+    <meta name="twitter:description" content="Experienced Data Scientist and Software Engineer specializing in AI, machine learning, and web development.">
     <link rel="stylesheet" href="assets/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,14 +24,15 @@
     <script src="js/chatbot.js" defer></script>
 </head>
 <body>
-    <header class="header">
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+    <header class="header" role="banner">
         <div class="container header-container">
             <div class="logo">
-                <a href="#home">NI</a>
+                <a href="#home" aria-label="Home - Nyenzo Isabwa Portfolio">NI</a>
             </div>
-            <nav class="main-nav">
+            <nav class="main-nav" role="navigation" aria-label="Main navigation">
                 <ul class="nav-list">
-                    <li><a href="#home" class="nav-link active">Home</a></li>
+                    <li><a href="#home" class="nav-link active" aria-current="page">Home</a></li>
                     <li><a href="#skills" class="nav-link">Skills</a></li>
                     <li><a href="#portfolio" class="nav-link">Portfolio</a></li>
                     <li><a href="#contact" class="nav-link">Contact</a></li>
@@ -29,11 +41,12 @@
         </div>
     </header>
 
-    <section id="home" class="hero">
+    <main id="main-content" role="main">
+        <section id="home" class="hero" aria-labelledby="hero-title">
         <div class="container hero-container">
             <div class="hero-content">
-                <h1 class="hero-title">Hi, I'm <span class="highlight">Nyenzo Isabwa</span></h1>
-                <h2 class="hero-subtitle">I'm a <span class="typed"></span></h2>
+                    <h1 id="hero-title" class="hero-title">Hi, I'm <span class="highlight">Nyenzo Isabwa</span></h1>
+                    <h2 class="hero-subtitle">I'm a <span class="typed" aria-label="Data Scientist, Software Engineer, Web Developer"></span></h2>
                 <p class="hero-text">
                     Passionate about creating innovative solutions through data science, AI, and web development. 
                     I transform complex problems into elegant, user-friendly applications.
@@ -43,9 +56,9 @@
                     <a href="#contact" class="btn btn-secondary">Contact Me</a>
                 </div>
             </div>
-            <div class="hero-image">
+                <div class="hero-image" aria-hidden="true">
                 <div class="animation-container">
-                    <svg class="neural-network" viewBox="0 0 500 500">
+                        <svg class="neural-network" viewBox="0 0 500 500" role="img" aria-label="Neural network animation">
                         <defs>
                             <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
                                 <stop offset="0%" style="stop-color:#1e3a8a;stop-opacity:1" />
@@ -69,35 +82,35 @@
         </div>
     </section>
 
-    <section id="skills" class="skills-section section">
+        <section id="skills" class="skills-section section" aria-labelledby="skills-title">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">My Skills</h2>
+                    <h2 id="skills-title" class="section-title">My Skills</h2>
                 <div class="section-underline"></div>
                 <p class="section-subtitle">Technologies and Tools I Master</p>
             </div>
             <div class="skills-container">
                 <div class="skill-category">
                     <div class="category-header">
-                        <i class="fas fa-brain"></i>
+                            <i class="fas fa-brain" aria-hidden="true"></i>
                         <h3 class="category-title">Data Science & AI</h3>
                     </div>
                     <div class="skills-grid">
                         <div class="skill-item">
                             <span class="skill-name">Machine Learning</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="Machine Learning skill level 90%">
                                 <div class="skill-level" style="width: 90%"></div>
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">Deep Learning</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Deep Learning skill level 85%">
                                 <div class="skill-level" style="width: 85%"></div>
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">Data Analysis</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" aria-label="Data Analysis skill level 95%">
                                 <div class="skill-level" style="width: 95%"></div>
                             </div>
                         </div>
@@ -106,37 +119,37 @@
 
                 <div class="skill-category">
                     <div class="category-header">
-                        <i class="fas fa-code"></i>
+                            <i class="fas fa-code" aria-hidden="true"></i>
                         <h3 class="category-title">Programming Languages</h3>
                     </div>
                     <div class="skills-grid">
                         <div class="skill-item">
                             <span class="skill-name">Python</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" aria-label="Python skill level 95%">
                                 <div class="skill-level" style="width: 95%"></div>
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">JavaScript</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100" aria-label="JavaScript skill level 90%">
                                 <div class="skill-level" style="width: 90%"></div>
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">R</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="77" aria-valuemin="0" aria-valuemax="100" aria-label="R skill level 77%">
                                 <div class="skill-level" style="width: 77%"></div>
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">SQL</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="84" aria-valuemin="0" aria-valuemax="100" aria-label="SQL skill level 84%">
                                 <div class="skill-level" style="width: 84%"></div>        
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">NoSQL</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="NoSQL skill level 88%">
                                 <div class="skill-level" style="width: 88%"></div>
                             </div>
                         </div>
@@ -145,25 +158,25 @@
 
                 <div class="skill-category">
                     <div class="category-header">
-                        <i class="fas fa-globe"></i>
+                            <i class="fas fa-globe" aria-hidden="true"></i>
                         <h3 class="category-title">Web Development</h3>
                     </div>
                     <div class="skills-grid">
                         <div class="skill-item">
                             <span class="skill-name">React.js</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="88" aria-valuemin="0" aria-valuemax="100" aria-label="React.js skill level 88%">
                                 <div class="skill-level" style="width: 88%"></div>
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">Node.js</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Node.js skill level 85%">
                                 <div class="skill-level" style="width: 85%"></div>
                             </div>
                         </div>
                         <div class="skill-item">
                             <span class="skill-name">HTML/CSS</span>
-                            <div class="skill-bar">
+                                <div class="skill-bar" role="progressbar" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100" aria-label="HTML/CSS skill level 95%">
                                 <div class="skill-level" style="width: 95%"></div>
                             </div>
                         </div>
@@ -173,18 +186,18 @@
         </div>
     </section>
 
-    <section id="portfolio" class="portfolio-section section">
+        <section id="portfolio" class="portfolio-section section" aria-labelledby="portfolio-title">
         <div class="container">
             <div class="section-header">
-                <h2 class="section-title">Latest Projects</h2>
+                    <h2 id="portfolio-title" class="section-title">Latest Projects</h2>
                 <div class="section-underline"></div>
                 <p class="section-subtitle">Check out my recent work</p>
             </div>
             <div class="portfolio-grid">
-                <div class="portfolio-item">
+                    <article class="portfolio-item">
                     <div class="portfolio-card">
                         <div class="portfolio-img">
-                            <img src="assets/images/fintech.jpg" alt="Aivestor AI Project">
+                                <img src="assets/images/fintech.jpg" alt="Aivestor AI Project interface showing investment dashboard">
                         </div>
                         <div class="portfolio-content">
                             <h3 class="project-title">Aivestor - AI Investment Advisor</h3>
@@ -192,99 +205,136 @@
                                 An advanced AI-powered application that provides personalized investment advice using machine learning algorithms.
                             </p>
                             <div class="project-links">
-                                <a href="https://github.com/Nyenzo/aivestor-ai" target="_blank" class="project-link">
-                                    <i class="fab fa-github"></i> GitHub
+                                    <a href="https://github.com/Nyenzo/aivestor-ai" target="_blank" class="project-link" aria-label="View Aivestor AI project on GitHub (opens in new tab)">
+                                        <i class="fab fa-github" aria-hidden="true"></i> GitHub
                                 </a>
-                                <a href="#" target="_blank" class="project-link">
-                                    <i class="fas fa-external-link-alt"></i> Demo
-                                </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </article>
 
-                <div class="portfolio-item">
+                    <article class="portfolio-item">
                     <div class="portfolio-card">
                         <div class="portfolio-img">
-                            <img src="assets/images/trading bot images.jpg" alt="Trading Bot Project">
+                                <img src="assets/images/trading bot images.jpg" alt="Algorithmic trading bot interface showing forex and gold market data">
                         </div>
                         <div class="portfolio-content">
-                            <h3 class="project-title">Automated Trading Bot</h3>
+                                <h3 class="project-title">Algorithmic Trading Bot</h3>
                             <p class="project-description">
-                                High-frequency trading bot designed to operate on forex pairs including Gold, USDJPY, AUDUSD, and GBPUSD.
+                                    A sophisticated trading system for forex and gold markets with real-time data analysis and automated decision-making.
                             </p>
                             <div class="project-links">
-                                <a href="https://github.com/Nyenzo/Trading-bot" target="_blank" class="project-link">
-                                    <i class="fab fa-github"></i> GitHub
+                                    <a href="#" class="project-link" aria-label="View trading bot project details">
+                                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> View Details
                                 </a>
-                                <a href="#" target="_blank" class="project-link">
-                                    <i class="fas fa-chart-line"></i> Analysis
-                                </a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </article>
 
-                <div class="portfolio-item">
+                    <article class="portfolio-item">
                     <div class="portfolio-card">
                         <div class="portfolio-img">
-                            <img src="assets/images/tule-initiative.png" alt="Tule Initiative Website">
+                                <img src="assets/images/tule-initiative.jpg" alt="Tule Initiative community website showing community dashboard">
                         </div>
                         <div class="portfolio-content">
                             <h3 class="project-title">Tule Initiative Website</h3>
                             <p class="project-description">
-                                Official website for the Tule Initiative. Currently in final development stages with modern design.
+                                    A community-driven website built with Next.js featuring server-side rendering and dynamic content management.
                             </p>
                             <div class="project-links">
-                                <a href="https://nyenzo.github.io" target="_blank" class="project-link">
-                                    <i class="fas fa-globe"></i> Website
+                                    <a href="#" class="project-link" aria-label="View Tule Initiative website">
+                                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> View Website
                                 </a>
-                                <a href="#" target="_blank" class="project-link">
-                                    <i class="fas fa-code"></i> Code
-                                </a>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+            </div>
+        </div>
+    </section>
+
+        <section id="contact" class="contact-section section" aria-labelledby="contact-title">
+        <div class="container">
+            <div class="section-header">
+                    <h2 id="contact-title" class="section-title">Get In Touch</h2>
+                <div class="section-underline"></div>
+                    <p class="section-subtitle">Let's work together on your next project</p>
+            </div>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                                <i class="fas fa-envelope" aria-hidden="true"></i>
+                        </div>
+                        <div class="contact-text">
+                            <h3>Email</h3>
+                                <p><a href="mailto:nyenzoisabwa@gmail.com" aria-label="Send email to nyenzoisabwa@gmail.com">nyenzoisabwa@gmail.com</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-phone" aria-hidden="true"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Phone</h3>
+                                <p><a href="tel:+254796952247" aria-label="Call +254 796 952247">(+254) 796-952247</a></p>
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <div class="contact-icon">
+                                <i class="fas fa-map-marker-alt" aria-hidden="true"></i>
+                            </div>
+                            <div class="contact-text">
+                                <h3>Location</h3>
+                                <p>Nairobi, Kenya</p>
                             </div>
                         </div>
                     </div>
+                    
+                    <div class="social-links">
+                        <a href="https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/" target="_blank" class="social-link" aria-label="Connect on LinkedIn (opens in new tab)">
+                            <i class="fab fa-linkedin" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://github.com/Nyenzo" target="_blank" class="social-link" aria-label="View GitHub profile (opens in new tab)">
+                            <i class="fab fa-github" aria-hidden="true"></i>
+                        </a>
+                        <a href="https://twitter.com/nyenzoisabwa" target="_blank" class="social-link" aria-label="Follow on Twitter (opens in new tab)">
+                            <i class="fab fa-twitter" aria-hidden="true"></i>
+                        </a>
+                    </div>
+
+                <div class="contact-form-container">
+                        <form class="contact-form" action="https://formspree.io/f/xpzgwqzg" method="POST" aria-labelledby="contact-form-title">
+                            <h3 id="contact-form-title">Send me a message</h3>
+                        <div class="form-group">
+                            <label for="name">Name</label>
+                                <input type="text" id="name" name="name" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                                <input type="email" id="email" name="email" required aria-required="true">
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                                <textarea id="message" name="message" rows="5" required aria-required="true"></textarea>
+                        </div>
+                            <button type="submit" class="submit-btn">Send Message</button>
+                    </form>
                 </div>
             </div>
         </div>
     </section>
+    </main>
 
-    <section id="contact" class="contact-section section">
-        <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Get In Touch</h2>
-                <div class="section-underline"></div>
-                <p class="section-subtitle">Let's work together</p>
-            </div>
-            <div class="social-links" style="margin-bottom: 24px; text-align: center;">
-                <a href="https://www.linkedin.com/in/nyenzo-isabwa-5b0734352/" class="social-link" target="_blank"><i class="fab fa-linkedin"></i></a>
-                <a href="https://github.com/Nyenzo" class="social-link" target="_blank"><i class="fab fa-github"></i></a>
-                <a href="https://twitter.com/NyenzoI" class="social-link" target="_blank"><i class="fab fa-twitter"></i></a>
-            </div>
-            <form action="https://formspree.io/f/xrbkvjgj" method="POST" class="contact-form">
-                <div class="form-group">
-                    <input type="text" name="name" placeholder="Your Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" name="email" placeholder="Your Email" required>
-                </div>
-                <div class="form-group">
-                    <textarea name="message" placeholder="Your Message" required></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary">Send Message</button>
-            </form>
-        </div>
-    </section>
-
-    <footer class="footer">
+    <footer class="footer" role="contentinfo">
         <div class="container">
             <div class="footer-content">
                 <div class="footer-logo">
-                    <h3>NI</h3>
+                    <h3>Nyenzo Isabwa</h3>
                     <p>Data Scientist & Software Engineer</p>
                 </div>
-                <nav class="footer-nav">
+                <nav class="footer-nav" aria-label="Footer navigation">
                     <ul class="footer-links">
                         <li><a href="#home">Home</a></li>
                         <li><a href="#skills">Skills</a></li>
@@ -294,7 +344,7 @@
                 </nav>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2025 Nyenzo Isabwa. All rights reserved.</p>
+                <p>&copy; 2024 Nyenzo Isabwa. All rights reserved.</p>
             </div>
         </div>
     </footer>

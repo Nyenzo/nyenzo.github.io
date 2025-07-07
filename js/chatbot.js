@@ -1092,13 +1092,25 @@ class NyenzoChatbot {
         contentElem.style.flexDirection = 'column';
         contentElem.style.alignItems = 'center';
 
+        // Add icon
+        const iconElem = document.createElement('div');
+        iconElem.className = 'message-icon';
         if (message.type === 'bot') {
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
-            contentElem.appendChild(bubble);
+            iconElem.innerHTML = `<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;" />`;
+        } else {
+            // Use a simple user SVG icon
+            iconElem.innerHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="User"><circle cx="16" cy="16" r="16" fill="#e5e7eb"/><circle cx="16" cy="13" r="6" fill="#a0aec0"/><ellipse cx="16" cy="24" rx="8" ry="4" fill="#cbd5e1"/></svg>`;
+        }
+        contentElem.appendChild(iconElem);
 
-            // Add feedback buttons below message bubble
+        // Message bubble
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble';
+        bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
+        contentElem.appendChild(bubble);
+
+        // Feedback buttons and timestamp for bot
+        if (message.type === 'bot') {
             const feedbackContainer = document.createElement('div');
             feedbackContainer.style.display = 'flex';
             feedbackContainer.style.gap = '8px';
@@ -1110,31 +1122,20 @@ class NyenzoChatbot {
                 <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful">👎</button>
             `;
             contentElem.appendChild(feedbackContainer);
-
-            // Add timestamp below feedback
-            const timestampElem = document.createElement('div');
-            timestampElem.className = 'message-timestamp';
-            const now = new Date();
-            timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            contentElem.appendChild(timestampElem);
-        } else {
-            const bubble = document.createElement('div');
-            bubble.className = 'message-bubble';
-            bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
-            contentElem.appendChild(bubble);
-            
-            const timestampElem = document.createElement('div');
-            timestampElem.className = 'message-timestamp';
-            const now = new Date();
-            timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-            contentElem.appendChild(timestampElem);
         }
+
+        // Timestamp
+        const timestampElem = document.createElement('div');
+        timestampElem.className = 'message-timestamp';
+        const now = new Date();
+        timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        contentElem.appendChild(timestampElem);
 
         messageElem.appendChild(contentElem);
         messagesContainer.appendChild(messageElem);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        // Handle feedback events for bot messages
+        // Feedback event
         if (message.type === 'bot') {
             const feedbackBtns = messageElem.querySelectorAll('.chatbot-feedback-btn');
             feedbackBtns.forEach(btn => {

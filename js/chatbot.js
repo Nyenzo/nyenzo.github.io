@@ -492,38 +492,46 @@ class NyenzoChatbot {
 
     createChatbotUI() {
         const chatbotHTML = `
-            <div id="chatbot-container" class="chatbot-container">
-                <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot">
-                    <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" />
+            <div id="chatbot-container" class="chatbot-container" role="complementary" aria-label="Nyenzo AI Assistant">
+                <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open Nyenzo AI Assistant chatbot" aria-expanded="false" aria-controls="chatbot-window">
+                    <img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI Assistant" />
                 </button>
-                <div id="chatbot-window" class="chatbot-window" style="display:none;">
+                <div id="chatbot-window" class="chatbot-window" style="display:none;" role="dialog" aria-labelledby="chatbot-title" aria-describedby="chatbot-description">
                     <div class="chatbot-header">
-                        <div class="chatbot-title">
-                            <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" />
+                        <div class="chatbot-title" id="chatbot-title">
+                            <img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI Assistant" />
                             <span>Nyenzo AI Assistant</span>
                         </div>
                         <button id="chatbot-close" class="chatbot-close" aria-label="Close chatbot">
-                            <i class="fas fa-times"></i>
+                            <i class="fas fa-times" aria-hidden="true"></i>
                         </button>
                     </div>
-                    <div id="chatbot-messages" class="chatbot-messages">
+                    <div id="chatbot-description" class="sr-only">
+                        Chat with Nyenzo AI Assistant. Ask questions about skills, projects, experience, and more.
+                    </div>
+                    <div id="chatbot-messages" class="chatbot-messages" role="log" aria-live="polite" aria-label="Chat messages">
                         <!-- Messages will be added here -->
                     </div>
                     <div class="chatbot-input-container">
-                        <form id="chatbot-form" style="display: flex; width: 100%; gap: 12px;">
+                        <form id="chatbot-form" style="display: flex; width: 100%; gap: 12px;" role="search" aria-label="Send a message">
                             <textarea 
                                 id="chatbot-input" 
                                 placeholder="Talk to me..." 
                                 rows="1"
                                 style="resize: none; overflow: hidden;"
+                                aria-label="Type your message"
+                                aria-describedby="chatbot-input-help"
                             ></textarea>
                             <button type="submit" id="chatbot-send" aria-label="Send message">
-                                <i class="fas fa-paper-plane"></i>
+                                <i class="fas fa-paper-plane" aria-hidden="true"></i>
                             </button>
                         </form>
+                        <div id="chatbot-input-help" class="sr-only">
+                            Press Enter to send your message, or use the send button.
+                        </div>
                     </div>
                 </div>
-                <div id="chatbot-tooltip" class="chatbot-tooltip">
+                <div id="chatbot-tooltip" class="chatbot-tooltip" role="tooltip" aria-hidden="true">
                     Hi there 👋
                 </div>
             </div>
@@ -535,6 +543,56 @@ class NyenzoChatbot {
         textarea.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Enhanced keyboard navigation
+        this.setupKeyboardNavigation();
+    }
+
+    setupKeyboardNavigation() {
+        const toggleBtn = document.getElementById('chatbot-toggle');
+        const closeBtn = document.getElementById('chatbot-close');
+        const input = document.getElementById('chatbot-input');
+        const sendBtn = document.getElementById('chatbot-send');
+
+        // Toggle chatbot with Enter or Space
+        toggleBtn.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.toggleChatbot();
+            }
+        });
+
+        // Close chatbot with Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen) {
+                this.toggleChatbot();
+            }
+        });
+
+        // Enhanced input handling
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                this.handleUserInput();
+            }
+        });
+
+        // Focus management
+        toggleBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                if (this.isOpen) {
+                    input.focus();
+                } else {
+                    toggleBtn.focus();
+                }
+            }, 100);
+        });
+
+        closeBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                toggleBtn.focus();
+            }, 100);
         });
     }
 
@@ -578,23 +636,44 @@ class NyenzoChatbot {
 
     toggleChatbot() {
         const window = document.getElementById('chatbot-window');
+        const toggleBtn = document.getElementById('chatbot-toggle');
+        const tooltip = document.getElementById('chatbot-tooltip');
+        
         this.isOpen = !this.isOpen;
         window.style.display = this.isOpen ? 'flex' : 'none';
+        
+        // Update ARIA attributes
+        toggleBtn.setAttribute('aria-expanded', this.isOpen.toString());
+        
         // Hide tooltip immediately if opening bot
         if (this.isOpen) {
-            const tooltip = document.getElementById('chatbot-tooltip');
-            if (tooltip) tooltip.remove();
+            if (tooltip) {
+                tooltip.setAttribute('aria-hidden', 'true');
+                tooltip.remove();
+            }
         }
+        
         if (this.isOpen && !this.hasShownWelcome) {
             this.loadWelcomeMessage();
             this.hasShownWelcome = true;
         }
+        
         if (this.isOpen) {
+            // Announce chatbot opened to screen readers
+            this.announceToScreenReader('Nyenzo AI Assistant opened. You can now type your message.');
+            
             setTimeout(() => {
                 const input = document.getElementById('chatbot-input');
-                if (input) input.focus();
+                if (input) {
+                    input.focus();
+                    // Announce focus to screen readers
+                    this.announceToScreenReader('Message input focused. Type your question and press Enter to send.');
+                }
             }, 200);
         } else {
+            // Announce chatbot closed to screen readers
+            this.announceToScreenReader('Nyenzo AI Assistant closed.');
+            
             this.tooltipState++;
             this.showInitialTooltip();
         }
@@ -1138,6 +1217,8 @@ class NyenzoChatbot {
 
         const messageElem = document.createElement('div');
         messageElem.className = `chatbot-message ${message.type === 'user' ? 'user-message' : 'bot-message'}`;
+        messageElem.setAttribute('role', 'article');
+        messageElem.setAttribute('aria-label', `${message.type === 'user' ? 'Your message' : 'Nyenzo AI response'}`);
 
         const contentElem = document.createElement('div');
         contentElem.className = 'message-content ' + (message.type === 'user' ? 'right' : 'left');
@@ -1148,11 +1229,13 @@ class NyenzoChatbot {
             // Bot message with icon
             const iconContainer = document.createElement('div');
             iconContainer.className = 'message-icon';
+            iconContainer.setAttribute('aria-hidden', 'true');
             iconContainer.innerHTML = '<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" />';
             contentElem.appendChild(iconContainer);
 
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
+            bubble.setAttribute('role', 'text');
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
             contentElem.appendChild(bubble);
 
@@ -1163,15 +1246,24 @@ class NyenzoChatbot {
             feedbackContainer.style.marginTop = '0px';
             feedbackContainer.style.marginBottom = '2px';
             feedbackContainer.style.justifyContent = 'center';
+            feedbackContainer.setAttribute('role', 'group');
+            feedbackContainer.setAttribute('aria-label', 'Rate this response');
             feedbackContainer.innerHTML = `
-                <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful">👍</button>
-                <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful">👎</button>
+                <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful" aria-label="Mark as helpful">
+                    <span aria-hidden="true">👍</span>
+                    <span class="sr-only">Helpful</span>
+                </button>
+                <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful" aria-label="Mark as not helpful">
+                    <span aria-hidden="true">👎</span>
+                    <span class="sr-only">Not helpful</span>
+                </button>
             `;
             contentElem.appendChild(feedbackContainer);
 
             // Add timestamp below feedback
             const timestampElem = document.createElement('div');
             timestampElem.className = 'message-timestamp';
+            timestampElem.setAttribute('aria-label', 'Message timestamp');
             const now = new Date();
             timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             contentElem.appendChild(timestampElem);
@@ -1179,16 +1271,19 @@ class NyenzoChatbot {
             // User message with icon
             const iconContainer = document.createElement('div');
             iconContainer.className = 'message-icon';
+            iconContainer.setAttribute('aria-hidden', 'true');
             iconContainer.innerHTML = '<img src="assets/images/user-icon.svg" alt="User" />';
             contentElem.appendChild(iconContainer);
             
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
+            bubble.setAttribute('role', 'text');
             bubble.innerHTML = `<span class="message-text">${message.content.replace(/\n/g, '<br>')}</span>`;
             contentElem.appendChild(bubble);
             
             const timestampElem = document.createElement('div');
             timestampElem.className = 'message-timestamp';
+            timestampElem.setAttribute('aria-label', 'Message timestamp');
             const now = new Date();
             timestampElem.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             contentElem.appendChild(timestampElem);
@@ -1198,22 +1293,50 @@ class NyenzoChatbot {
         messagesContainer.appendChild(messageElem);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
+        // Announce new message to screen readers
+        if (message.type === 'bot') {
+            this.announceToScreenReader(`New message from Nyenzo AI: ${message.content.substring(0, 100)}${message.content.length > 100 ? '...' : ''}`);
+        }
+
         // Handle feedback events for bot messages
         if (message.type === 'bot') {
             const feedbackBtns = messageElem.querySelectorAll('.chatbot-feedback-btn');
             feedbackBtns.forEach(btn => {
                 btn.onclick = (e) => {
                     const feedback = parseInt(btn.getAttribute('data-feedback'));
+                    const feedbackText = feedback === 1 ? 'marked as helpful' : 'marked as not helpful';
+                    
                     this.mlModel.learnFromInteraction(
                         this.conversationHistory[this.conversationHistory.length - 1].user,
                         message.content,
                         feedback
                     );
+                    
                     btn.disabled = true;
                     btn.style.opacity = 0.5;
+                    btn.setAttribute('aria-label', `${feedbackText} - feedback submitted`);
+                    
+                    // Announce feedback submission
+                    this.announceToScreenReader(`Response ${feedbackText}`);
                 };
             });
         }
+    }
+
+    announceToScreenReader(message) {
+        // Create a temporary element for screen reader announcements
+        const announcement = document.createElement('div');
+        announcement.setAttribute('aria-live', 'polite');
+        announcement.setAttribute('aria-atomic', 'true');
+        announcement.className = 'sr-only';
+        announcement.textContent = message;
+        
+        document.body.appendChild(announcement);
+        
+        // Remove after announcement
+        setTimeout(() => {
+            document.body.removeChild(announcement);
+        }, 1000);
     }
 
     // Persist model state to localStorage
@@ -1276,68 +1399,134 @@ class NyenzoChatbot {
 
     showTypingIndicator() {
         const messagesContainer = document.getElementById('chatbot-messages');
-        const typingElement = document.createElement('div');
-        typingElement.className = 'chatbot-message bot-message';
-        typingElement.id = 'typing-indicator';
+        if (!messagesContainer) return;
+
+        const typingElem = document.createElement('div');
+        typingElem.className = 'chatbot-message bot-message typing-indicator';
+        typingElem.setAttribute('role', 'status');
+        typingElem.setAttribute('aria-label', 'Nyenzo AI is typing');
+        typingElem.setAttribute('aria-live', 'polite');
         
-        typingElement.innerHTML = `
-            <div class="message-content left">
-                <div class="message-icon">
-                    <img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
-                </div>
-                <div class="typing-indicator">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                </div>
+        const contentElem = document.createElement('div');
+        contentElem.className = 'message-content left';
+        contentElem.style.flexDirection = 'column';
+        contentElem.style.alignItems = 'center';
+
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'message-icon';
+        iconContainer.setAttribute('aria-hidden', 'true');
+        iconContainer.innerHTML = '<img src="assets/images/Chatbot-icon.jpg" alt="Nyenzo AI" />';
+        contentElem.appendChild(iconContainer);
+
+        const bubble = document.createElement('div');
+        bubble.className = 'message-bubble typing-indicator';
+        bubble.setAttribute('role', 'text');
+        bubble.innerHTML = `
+            <div class="typing-dots">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
             </div>
+            <span class="sr-only">Nyenzo AI is typing a response</span>
         `;
-        
-        messagesContainer.appendChild(typingElement);
+        contentElem.appendChild(bubble);
+
+        typingElem.appendChild(contentElem);
+        messagesContainer.appendChild(typingElem);
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+        // Announce typing to screen readers
+        this.announceToScreenReader('Nyenzo AI is typing a response...');
     }
 
     hideTypingIndicator() {
-        const typingIndicator = document.getElementById('typing-indicator');
+        const typingIndicator = document.querySelector('.typing-indicator');
         if (typingIndicator) {
             typingIndicator.remove();
         }
     }
 
     bindEvents() {
-        const toggle = document.getElementById('chatbot-toggle');
-        const close = document.getElementById('chatbot-close');
-        const input = document.getElementById('chatbot-input');
-        const send = document.getElementById('chatbot-send');
+        const toggleBtn = document.getElementById('chatbot-toggle');
+        const closeBtn = document.getElementById('chatbot-close');
         const form = document.getElementById('chatbot-form');
-        const chatbotWindow = document.getElementById('chatbot-window');
-        const chatbotContainer = document.getElementById('chatbot-container');
+        const input = document.getElementById('chatbot-input');
 
-        toggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleChatbot();
-        });
-        close.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.toggleChatbot();
-        });
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleUserInput();
-        });
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => this.toggleChatbot());
+        }
+
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => this.toggleChatbot());
+        }
+
+        if (form) {
+            form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 this.handleUserInput();
-            }
+            });
+        }
+
+        if (input) {
+            input.addEventListener('input', () => {
+                // Auto-resize textarea
+                input.style.height = 'auto';
+                input.style.height = Math.min(input.scrollHeight, 120) + 'px';
+            });
+
+            // Enhanced input validation
+            input.addEventListener('invalid', (e) => {
+                e.preventDefault();
+                this.announceToScreenReader('Please enter a message before sending.');
+            });
+        }
+
+        // Enhanced error handling
+        window.addEventListener('error', (e) => {
+            console.error('Chatbot error:', e.error);
+            this.announceToScreenReader('An error occurred. Please try again.');
         });
-        document.addEventListener('mousedown', (event) => {
-            if (this.isOpen && chatbotWindow.style.display !== 'none') {
-                if (!chatbotWindow.contains(event.target) && !toggle.contains(event.target)) {
+
+        // Handle form submission errors
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                const input = document.getElementById('chatbot-input');
+                if (!input || !input.value.trim()) {
+                    e.preventDefault();
+                    this.announceToScreenReader('Please enter a message before sending.');
+                    input?.focus();
+                    return false;
+                }
+            });
+        }
+
+        // Enhanced keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            // Ctrl/Cmd + K to focus chatbot
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                if (!this.isOpen) {
                     this.toggleChatbot();
+                } else {
+                    input?.focus();
                 }
             }
         });
+
+        // Handle reduced motion preferences
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            // Disable animations for users who prefer reduced motion
+            const style = document.createElement('style');
+            style.textContent = `
+                .chatbot-message,
+                .message-bubble,
+                .typing-dot {
+                    animation: none !important;
+                    transition: none !important;
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 }
 

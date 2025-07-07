@@ -493,20 +493,20 @@ class NyenzoChatbot {
     createChatbotUI() {
         const chatbotHTML = `
             <div id="chatbot-container" class="chatbot-container">
-                <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot" aria-haspopup="dialog">
+                <button id="chatbot-toggle" class="chatbot-toggle" aria-label="Open chatbot">
                     <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" />
                 </button>
-                <div id="chatbot-window" class="chatbot-window" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="chatbot-title-label">
+                <div id="chatbot-window" class="chatbot-window" style="display:none;">
                     <div class="chatbot-header">
                         <div class="chatbot-title">
                             <img src="assets/images/Chatbot-icon.jpg" alt="Chatbot" />
-                            <span id="chatbot-title-label">Nyenzo AI Assistant</span>
+                            <span>Nyenzo AI Assistant</span>
                         </div>
                         <button id="chatbot-close" class="chatbot-close" aria-label="Close chatbot">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <div id="chatbot-messages" class="chatbot-messages" aria-live="polite" aria-atomic="false" tabindex="0">
+                    <div id="chatbot-messages" class="chatbot-messages">
                         <!-- Messages will be added here -->
                     </div>
                     <div class="chatbot-input-container">
@@ -516,7 +516,6 @@ class NyenzoChatbot {
                                 placeholder="Talk to me..." 
                                 rows="1"
                                 style="resize: none; overflow: hidden;"
-                                aria-label="Type your message to Nyenzo AI Assistant"
                             ></textarea>
                             <button type="submit" id="chatbot-send" aria-label="Send message">
                                 <i class="fas fa-paper-plane"></i>
@@ -524,7 +523,7 @@ class NyenzoChatbot {
                         </form>
                     </div>
                 </div>
-                <div id="chatbot-tooltip" class="chatbot-tooltip" aria-hidden="true">
+                <div id="chatbot-tooltip" class="chatbot-tooltip">
                     Hi there 👋
                 </div>
             </div>
@@ -579,17 +578,12 @@ class NyenzoChatbot {
 
     toggleChatbot() {
         const window = document.getElementById('chatbot-window');
-        const toggleBtn = document.getElementById('chatbot-toggle');
         this.isOpen = !this.isOpen;
         window.style.display = this.isOpen ? 'flex' : 'none';
-        window.setAttribute('aria-hidden', this.isOpen ? 'false' : 'true');
         // Hide tooltip immediately if opening bot
         if (this.isOpen) {
             const tooltip = document.getElementById('chatbot-tooltip');
-            if (tooltip) {
-                tooltip.setAttribute('aria-hidden', 'true');
-                tooltip.remove();
-            }
+            if (tooltip) tooltip.remove();
         }
         if (this.isOpen && !this.hasShownWelcome) {
             this.loadWelcomeMessage();
@@ -603,10 +597,6 @@ class NyenzoChatbot {
         } else {
             this.tooltipState++;
             this.showInitialTooltip();
-            // Return focus to toggle button for accessibility
-            setTimeout(() => {
-                if (toggleBtn) toggleBtn.focus();
-            }, 200);
         }
     }
 
@@ -707,37 +697,29 @@ class NyenzoChatbot {
     }
 
     handleSpecificQuestions(input) {
-        // Handle personal questions that should be redirected to in-person conversation
-        if (input.includes('age') || input.includes('how old') || input.includes('height') || input.includes('tall') || input.includes('how tall') || 
-            input.includes('weight') || input.includes('personal') || input.includes('your age') || input.includes('your height') || 
-            input.includes('marital') || input.includes('relationship') || input.includes('family') || input.includes('personal life')) {
-            return "Hehe. I don't like talking about myself over the internet. I would however be happy to indulge and answer personal questions in person. Feel free to reach out to me!";
+        // Sensitive personal questions
+        if (
+            input.includes('age') || input.includes('how old') ||
+            input.includes('height') || input.includes('tall') || input.includes('how tall') ||
+            input.includes('weight') || input.includes('birthday') || input.includes('born') ||
+            input.includes('single') || input.includes('married') || input.includes('relationship')
+        ) {
+            return "Hehe. I don't like talking about myself over the internet. I would however be happy to indulge and answer personal questions in person. Feel free to reach out to me.";
         }
-        
-        if (input.includes('tesla') || input.includes('elon musk')) {
-            return `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
-        }
-        
+
+        // Emotional support
         if (input.includes('sad') || input.includes('depressed') || input.includes('unhappy')) {
             return "I'm sorry to hear that... I understand. If you'd like to talk about it or need support, I'm here to listen... I understand. Would you like to share more or talk about something that might help?";
         }
-        
         if (input.includes('yes') && this.conversationHistory.length > 1) {
             const lastMessage = this.conversationHistory[this.conversationHistory.length - 2].user.toLowerCase();
             if (lastMessage.includes('sad') || lastMessage.includes('depressed') || lastMessage.includes('unhappy')) {
                 return "I'm here to listen. Sometimes talking helps, and sometimes it's good to focus on something else. Would you like to share what's on your mind, or would you prefer to talk about something completely different?";
             }
         }
-        
-        // Sentiment-aware fallback with fun facts
-        const sentiment = this.analyzeSentiment(input);
-        if (sentiment === 'negative') {
-            return "I'm sorry to hear that. If you'd like to talk about it or need support, I'm here to listen. Would you like to share more or talk about something that might help?";
-        } else if (sentiment === 'positive') {
-            return "I'm glad to hear that! If you want to share more good news or talk about anything else, I'm here for you.";
-        } else {
-            return `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
-        }
+
+        // Fallback for unknown topics (e.g. Tesla)
+        return `You caught me.🙃 I don't have an answer to that currently. I will look into it, here is a fun fact though: ${this.getRandomFunFact()}`;
     }
 
     detectIntent(input) {
@@ -1174,8 +1156,8 @@ class NyenzoChatbot {
             feedbackContainer.style.marginBottom = '2px';
             feedbackContainer.style.justifyContent = 'center';
             feedbackContainer.innerHTML = `
-                <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful" aria-label="Mark this response as helpful">👍</button>
-                <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful" aria-label="Mark this response as not helpful">👎</button>
+                <button class="chatbot-feedback-btn" data-feedback="1" title="Helpful">👍</button>
+                <button class="chatbot-feedback-btn" data-feedback="-1" title="Not helpful">👎</button>
             `;
             contentElem.appendChild(feedbackContainer);
 
@@ -1221,12 +1203,6 @@ class NyenzoChatbot {
                     );
                     btn.disabled = true;
                     btn.style.opacity = 0.5;
-                };
-                // Keyboard accessibility: allow Enter/Space to activate
-                btn.onkeydown = (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        btn.click();
-                    }
                 };
             });
         }

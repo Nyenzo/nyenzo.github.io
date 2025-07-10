@@ -459,5 +459,52 @@
     <div class="modal-body"></div>
   </div>
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Modal open logic
+    const modalMap = {
+      aivestor: document.getElementById('aivestor-modal'),
+      tradingbot: document.getElementById('tradingbot-modal'),
+      tule: document.getElementById('tule-modal')
+    };
+    const moreInfoButtons = document.querySelectorAll('.more-info-btn');
+    moreInfoButtons.forEach(btn => {
+      btn.addEventListener('click', function () {
+        const project = btn.getAttribute('data-project');
+        const modal = modalMap[project];
+        if (modal) {
+          modal.setAttribute('aria-hidden', 'false');
+          modal.style.display = 'block';
+          // Trap focus inside modal for accessibility
+          const focusable = modal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable.length) focusable[0].focus();
+        }
+      });
+    });
+
+    // Modal close logic
+    const closeModal = (modal) => {
+      modal.setAttribute('aria-hidden', 'true');
+      modal.style.display = 'none';
+    };
+    const closeButtons = document.querySelectorAll('.modal-close');
+    closeButtons.forEach(btn => {
+      btn.addEventListener('click', function () {
+        const modal = btn.closest('.modal');
+        if (modal) closeModal(modal);
+      });
+    });
+    // Close modal on outside click
+    Object.values(modalMap).forEach(modal => {
+      modal.addEventListener('mousedown', function (e) {
+        if (e.target === modal) closeModal(modal);
+      });
+      // Optional: close on Escape key
+      modal.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal(modal);
+      });
+    });
+  });
+</script>
 </body>
 </html>

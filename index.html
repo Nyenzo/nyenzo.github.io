@@ -243,7 +243,7 @@
                                     A community-driven website built with Next.js featuring server-side rendering and dynamic content management.
                             </p>
                             <div class="project-links">
-                                    <a href="#" class="project-link" aria-label="View Tule Initiative website">
+                                    <a href="#" class="project-link tule-website-btn" aria-label="View Tule Initiative website">
                                         <i class="fas fa-external-link-alt" aria-hidden="true"></i> View Website
                                 </a>
                                 <button class="btn btn-secondary more-info-btn" data-project="tule" type="button">More Info</button>
@@ -453,6 +453,14 @@
     </ul>
   </div>
 </div>
+<!-- Tule Initiative Alert Modal -->
+<div id="tule-alert-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="-1">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <h3>Currently Awaiting Deployment</h3>
+    <p>The Tule Initiative website is not yet live. Please check back soon!</p>
+  </div>
+</div>
 <div id="project-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
   <div class="modal-content" tabindex="-1">
     <button class="modal-close" aria-label="Close">&times;</button>
@@ -504,6 +512,26 @@
         if (e.key === 'Escape') closeModal(modal);
       });
     });
+    // Tule Initiative alert modal logic
+    const tuleWebsiteBtn = document.querySelector('.tule-website-btn');
+    const tuleAlertModal = document.getElementById('tule-alert-modal');
+    if (tuleWebsiteBtn && tuleAlertModal) {
+      tuleWebsiteBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        tuleAlertModal.setAttribute('aria-hidden', 'false');
+        tuleAlertModal.style.display = 'flex';
+        const focusable = tuleAlertModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable.length) focusable[0].focus();
+      });
+      // Close on outside click
+      tuleAlertModal.addEventListener('mousedown', function(e) {
+        if (e.target === tuleAlertModal) closeModal(tuleAlertModal);
+      });
+      // Close on Escape
+      tuleAlertModal.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeModal(tuleAlertModal);
+      });
+    }
   });
 </script>
 </body>

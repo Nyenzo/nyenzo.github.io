@@ -115,10 +115,11 @@
                             </div>
                         </div>
                         <div class="skill-item">
-                            <span class="skill-name">AI research</span>
-                                <div class="skill-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Node.js skill level 85%">
-                                <div class="skill-level" style="width: 85%"></div>
+                            <span class="skill-name">AI Research</span>
+                                <div class="skill-bar" role="progressbar" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100" aria-label="AI Research skill level 80%">
+                                <div class="skill-level" style="width: 80%"></div>
                             </div>
+                        </div>
                     </div>
                 </div>
 
@@ -174,13 +175,14 @@
                             </div>
                         </div>
                         <div class="skill-item">
-                            <span class="skill-name">Next.js</span>
+                            <span class="skill-name">Node.js</span>
                                 <div class="skill-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Node.js skill level 85%">
                                 <div class="skill-level" style="width: 85%"></div>
                             </div>
+                        </div>
                         <div class="skill-item">
-                            <span class="skill-name">Node.js</span>
-                                <div class="skill-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Node.js skill level 85%">
+                            <span class="skill-name">Next.js</span>
+                                <div class="skill-bar" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100" aria-label="Next.js skill level 85%">
                                 <div class="skill-level" style="width: 85%"></div>
                             </div>
                         </div>
@@ -253,9 +255,9 @@
                                     A community-driven website built with Next.js featuring server-side rendering and dynamic content management.
                             </p>
                             <div class="project-links">
-                                    <a href="#" class="project-link tule-website-btn" aria-label="View Tule Initiative website">
-                                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> View Website
-                                </a>
+                                    <button id="tule-visit-btn" class="project-link" type="button" aria-label="Visit Tule Initiative website (awaiting deployment)">
+                                        <i class="fas fa-external-link-alt" aria-hidden="true"></i> Visit Website
+                                    </button>
                                 <button class="btn btn-secondary more-info-btn" data-project="tule" type="button">More Info</button>
                             </div>
                         </div>
@@ -463,18 +465,18 @@
     </ul>
   </div>
 </div>
-<!-- Tule Initiative Alert Modal -->
-<div id="tule-alert-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
-  <div class="modal-content" tabindex="-1">
-    <button class="modal-close" aria-label="Close">&times;</button>
-    <h3>Currently Awaiting Deployment</h3>
-    <p>The Tule Initiative website is not yet live. Please check back soon!</p>
-  </div>
-</div>
 <div id="project-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
   <div class="modal-content" tabindex="-1">
     <button class="modal-close" aria-label="Close">&times;</button>
     <div class="modal-body"></div>
+  </div>
+</div>
+<!-- Tule Initiative Visit Website Modal -->
+<div id="tule-visit-modal" class="modal" aria-hidden="true" tabindex="-1" role="dialog" aria-modal="true">
+  <div class="modal-content" tabindex="-1">
+    <button class="modal-close" aria-label="Close">&times;</button>
+    <h2>Notice</h2>
+    <p>Currently awaiting deployment.</p>
   </div>
 </div>
 <script>
@@ -522,24 +524,33 @@
         if (e.key === 'Escape') closeModal(modal);
       });
     });
-    // Tule Initiative alert modal logic
-    const tuleWebsiteBtn = document.querySelector('.tule-website-btn');
-    const tuleAlertModal = document.getElementById('tule-alert-modal');
-    if (tuleWebsiteBtn && tuleAlertModal) {
-      tuleWebsiteBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        tuleAlertModal.setAttribute('aria-hidden', 'false');
-        tuleAlertModal.style.display = 'flex';
-        const focusable = tuleAlertModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+
+    // Tule Initiative Visit Website button modal logic
+    const tuleVisitBtn = document.getElementById('tule-visit-btn');
+    const tuleVisitModal = document.getElementById('tule-visit-modal');
+    if (tuleVisitBtn && tuleVisitModal) {
+      tuleVisitBtn.addEventListener('click', function () {
+        tuleVisitModal.setAttribute('aria-hidden', 'false');
+        tuleVisitModal.style.display = 'flex';
+        const focusable = tuleVisitModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
         if (focusable.length) focusable[0].focus();
       });
-      // Close on outside click
-      tuleAlertModal.addEventListener('mousedown', function(e) {
-        if (e.target === tuleAlertModal) closeModal(tuleAlertModal);
+      // Close logic for visit modal
+      tuleVisitModal.querySelector('.modal-close').addEventListener('click', function () {
+        tuleVisitModal.setAttribute('aria-hidden', 'true');
+        tuleVisitModal.style.display = 'none';
       });
-      // Close on Escape
-      tuleAlertModal.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') closeModal(tuleAlertModal);
+      tuleVisitModal.addEventListener('mousedown', function (e) {
+        if (e.target === tuleVisitModal) {
+          tuleVisitModal.setAttribute('aria-hidden', 'true');
+          tuleVisitModal.style.display = 'none';
+        }
+      });
+      tuleVisitModal.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          tuleVisitModal.setAttribute('aria-hidden', 'true');
+          tuleVisitModal.style.display = 'none';
+        }
       });
     }
   });

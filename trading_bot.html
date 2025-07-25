@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trading Automation Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.9/babel.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <div id="error" class="hidden text-red-500 text-center p-4">
+    Error: Unable to load the dashboard. Please ensure JavaScript is enabled and check the browser console for details.
+  </div>
+  <script type="text/babel">
+    // Mock data simulating historical_data/GBPUSD_hourly.csv
+    const mockData = Array.from({ length: 50 }, (_, i) => ({
+      timestamp: new Date(2025, 6, 1, i).toISOString(),
+      '1. open': 1.25 + Math.random() * 0.01,
+      '2. high': 1.26 + Math.random() * 0.01,
+      '3. low': 1.24 + Math.random() * 0.01,
+      '4. close': 1.25 + Math.random() * 0.01,
+      '5. volume': 10000 + Math.floor(Math.random() * 5000),
+      vix: 15 + Math.random() * 5,
+      unemployment_rate: 4.5,
+      nonfarm_payrolls: 150000,
+      '10-year_treasury_rate': 3.8
+    }));
+
+    // Mock signals (simulating signal_predictor.py)
+    const mockSignals = mockData.map((_, i) => ({
+      timestamp: new Date(2025, 6, 1, i).toISOString(),
+      signal: Math.random() > 0.5 ? 1 : 0,
+      confidence: 0.7 + Math.random() * 0.3,
+      limit_price: 1.25 + (Math.random() - 0.5) * 0.02,
+      stop_loss: 1.24 + (Math.random() - 0.5) * 0.01,
+      take_profit: 1.26 + (Math.random() - 0.5) * 0.01
+    }));
+
+    // Mock performance metrics (from train_evaluate.py)
+    const performanceMetrics = {
+      accuracy: 0.72,
+      precision: 0.75,
+      recall: 0.70,
+      f1: 0.73
+    };
+
+    // Technical indicators (simplified from signal_predictor.py)
+    function calculateSMA(data, window) {
+      return data.map((_, i, arr) => {
+        if (i < window - 1) return null;
+        const slice = arr.slice(i - window + 1, i + 1);
+        return slice.reduce((sum, item) => sum + item['4. close'], 0) / window;
+      });
+    }
+
+    function calculateRSI(data, window = 14) {
+      return data.map((_, i) => (i < window ? null : 70 - Math.random() * 20));
+    }
+
+    // Signal Component
+    function Signal({ signal }) {
+      const signalType = signal.signal === 1 ? 'Buy' : 'Sell';
+      const bgColor = signal.signal === 1 ? 'bg-green-500' : 'bg-red-500';
+      return (
+        <div className={`p-4 rounded-lg ${bgColor} text-white shadow-md`}>
+          <h3 className="text-lg font-bold">{signalType} Signal</h3>
+          <p>Time: {new Date(signal.timestamp).toLocaleString()}</p>
+          <p>Limit Price: {signal.limit_price.toFixed(5)}</p>
+          <p>Stop Loss: {signal.stop_loss.toFixed(5)}</p>
+          <p>Take Profit: {signal.take_profit.toFixed(5)}</p>
+          <p>Confidence: {(signal.confidence * 100).toFixed(2)}%</p>
+        </div>
+      );
+    }
+
+    // Metrics Component
+    function Metrics({ metrics }) {
+      return (
+        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-100 rounded-lg shadow-md">
+          <div>
+            <p className="font-semibold">Accuracy:</p>
+            <p>{(metrics.accuracy * 100).toFixed(2)}%</p>
+          </div>
+          <div>
+            <p className="font-semibold">Precision:</p>
+            <p>{(metrics.precision * 100).toFixed(2)}%</p>
+          </div>
+          <div>
+            <p className="font-semibold">Recall:</p>
+            <p>{(metrics.recall * 100).toFixed(2)}%</p>
+          </div>
+          <div>
+            <p className="font-semibold">F1 Score:</p>
+            <p>{(metrics.f1 * 100).toFixed(2)}%</p>
+          </div>
+        </div>
+      );
+    }
+
+    // Chart Component (Simplified to avoid canvas issues)
+    function Chart({ data }) {
+      const canvasRef = React.useRef(null);
+
+      React.useEffect(() => {
+        try {
+          const canvas = canvasRef.current;
+          if (!canvas) {
+            console.error("Canvas element not found");
+            return;
+          }
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+            console.error("Canvas context not available");
+            return;
+          }
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.beginPath();
+          const prices = data.map(d => d['4. close']).filter(p => p !== null);
+          if (prices.length === 0) {
+            console.warn("No valid price data for chart");
+            return;
+          }
+          const minPrice = Math.min(...prices);
+          const maxPrice = Math.max(...prices);
+          const priceRange = maxPrice - minPrice || 1; // Avoid division by zero
+          const width = canvas.width;
+          const height = canvas.height;
+
+          data.forEach((point, i) => {
+            const x = (i / (data.length - 1)) * width;
+            const y = height - ((point['4. close'] - minPrice) / priceRange) * (height - 20);
+            if (i === 0) {
+              ctx.moveTo(x, y);
+            } else {
+              ctx.lineTo(x, y);
+            }
+          });
+          ctx.strokeStyle = '#3b82f6';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        } catch (error) {
+          console.error("Error rendering chart:", error);
+        }
+      }, [data]);
+
+      return <canvas ref={canvasRef} width="600" height="200" className="w-full"></canvas>;
+    }
+
+    // Main Dashboard Component
+    function Dashboard() {
+      const [data] = React.useState(mockData);
+      const [signals] = React.useState(mockSignals);
+      const [metrics] = React.useState(performanceMetrics);
+
+      const latestSignal = signals[signals.length - 1];
+
+      console.log("Rendering Dashboard with data:", { dataLength: data.length, signalsLength: signals.length });
+
+      return (
+        <div className="min-h-screen bg-gray-50 p-6">
+          <h1 className="text-3xl font-bold text-center mb-6">Trading Automation Dashboard (GBPUSD)</h1>
+          <div className="max-w-4xl mx-auto space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">Latest Trading Signal</h2>
+              <Signal signal={latestSignal} />
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">Price Chart</h2>
+              <Chart data={data} />
+            </div>
+            <div className="bg-white p-6 rounded-lg shadow-lg">
+              <h2 className="text-xl font-semibold mb-4">Model Performance</h2>
+              <Metrics metrics={metrics} />
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Render with error handling
+    try {
+      console.log("Attempting to render React app...");
+      const root = ReactDOM.createRoot(document.getElementById('root'));
+      root.render(<Dashboard />);
+      console.log("React app rendered successfully");
+    } catch (error) {
+      console.error("Failed to render React app:", error);
+      document.getElementById('error').classList.remove('hidden');
+    }
+  </script>
+</body>
+</html>

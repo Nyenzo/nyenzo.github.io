@@ -4,192 +4,195 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Automation Dashboard</title>
-  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.9/babel.min.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <div id="root"></div>
-  <div id="error" class="hidden text-red-500 text-center p-4">
-    Error: Unable to load the dashboard. Please ensure JavaScript is enabled and check the browser console for details.
+<body class="bg-gray-900 text-white">
+  <!-- Header -->
+  <header class="bg-gray-800 p-4 text-center shadow-md">
+    <h1 class="text-3xl font-bold">Trading Automation Dashboard</h1>
+  </header>
+
+  <!-- Main Layout -->
+  <div class="flex flex-col md:flex-row gap-6 p-6 max-w-7xl mx-auto">
+    <!-- Sidebar -->
+    <aside class="w-full md:w-1/4 bg-gray-800 p-4 rounded-lg shadow-lg">
+      <h2 class="text-xl font-semibold mb-4">Settings</h2>
+      <label for="pairSelect" class="block text-lg font-medium mb-2">Select Pair:</label>
+      <select id="pairSelect" class="w-full p-2 border rounded bg-gray-700 text-white mb-4">
+        <option value="GBPUSD">GBPUSD</option>
+        <option value="EURUSD">EURUSD</option>
+        <option value="XAUUSD">XAUUSD (Gold)</option>
+      </select>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="w-full md:w-3/4 space-y-6">
+      <!-- Signal Box -->
+      <div id="signalBox" class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">Latest Trading Signal</h2>
+        <p id="signalText" class="text-gray-300">Waiting for signal...</p>
+      </div>
+
+      <!-- Price Data -->
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">Current Price Data</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div><p class="font-medium">Open:</p><p id="openPrice" class="text-green-400">0.00000</p></div>
+          <div><p class="font-medium">High:</p><p id="highPrice" class="text-green-400">0.00000</p></div>
+          <div><p class="font-medium">Low:</p><p id="lowPrice" class="text-red-400">0.00000</p></div>
+          <div><p class="font-medium">Close:</p><p id="closePrice" class="text-green-400">0.00000</p></div>
+        </div>
+      </div>
+
+      <!-- Candlestick Chart -->
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">Candlestick Chart</h2>
+        <canvas id="priceChart" width="600" height="300"></canvas>
+      </div>
+
+      <!-- Model Performance -->
+      <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+        <h2 class="text-xl font-semibold mb-4">Model Performance</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div><p class="font-medium">Accuracy:</p><p id="accuracy">72.00%</p></div>
+          <div><p class="font-medium">Precision:</p><p id="precision">75.00%</p></div>
+          <div><p class="font-medium">Recall:</p><p id="recall">70.00%</p></div>
+          <div><p class="font-medium">F1 Score:</p><p id="f1">73.00%</p></div>
+        </div>
+      </div>
+    </main>
   </div>
-  <script type="text/babel">
-    // Mock data simulating historical_data/GBPUSD_hourly.csv
-    const mockData = Array.from({ length: 50 }, (_, i) => ({
-      timestamp: new Date(2025, 6, 1, i).toISOString(),
-      '1. open': 1.25 + Math.random() * 0.01,
-      '2. high': 1.26 + Math.random() * 0.01,
-      '3. low': 1.24 + Math.random() * 0.01,
-      '4. close': 1.25 + Math.random() * 0.01,
-      '5. volume': 10000 + Math.floor(Math.random() * 5000),
-      vix: 15 + Math.random() * 5,
-      unemployment_rate: 4.5,
-      nonfarm_payrolls: 150000,
-      '10-year_treasury_rate': 3.8
-    }));
 
-    // Mock signals (simulating signal_predictor.py)
-    const mockSignals = mockData.map((_, i) => ({
-      timestamp: new Date(2025, 6, 1, i).toISOString(),
-      signal: Math.random() > 0.5 ? 1 : 0,
-      confidence: 0.7 + Math.random() * 0.3,
-      limit_price: 1.25 + (Math.random() - 0.5) * 0.02,
-      stop_loss: 1.24 + (Math.random() - 0.5) * 0.01,
-      take_profit: 1.26 + (Math.random() - 0.5) * 0.01
-    }));
+  <script>
+    // Initial data and state
+    let currentPair = 'GBPUSD';
+    let candleData = [];
+    let currentCandle = { open: 1.25, high: 1.25, low: 1.25, close: 1.25 };
+    let candleCount = 0;
+    const signalThreshold = 5; 
+    const performanceMetrics = { accuracy: 0.67, precision: 0.65, recall: 0.70, f1: 0.63 };
 
-    // Mock performance metrics (from train_evaluate.py)
-    const performanceMetrics = {
-      accuracy: 0.72,
-      precision: 0.75,
-      recall: 0.70,
-      f1: 0.73
-    };
+    // Initialize chart
+    const canvas = document.getElementById('priceChart');
+    const ctx = canvas.getContext('2d');
 
-    // Technical indicators (simplified from signal_predictor.py)
-    function calculateSMA(data, window) {
-      return data.map((_, i, arr) => {
-        if (i < window - 1) return null;
-        const slice = arr.slice(i - window + 1, i + 1);
-        return slice.reduce((sum, item) => sum + item['4. close'], 0) / window;
+    // Draw candlestick chart with grid and y-axis labels
+    function drawChart() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (candleData.length === 0) {
+        console.log("No candle data to draw");
+        return;
+      }
+
+      // Draw grid
+      ctx.strokeStyle = '#4b5563';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= 5; i++) {
+        const y = i * (canvas.height / 5);
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+
+        // Y-axis price labels
+        const maxPrice = Math.max(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
+        const minPrice = Math.min(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
+        const priceRange = maxPrice - minPrice || 1;
+        const labelPrice = minPrice + (priceRange * (5 - i) / 5);
+        ctx.fillStyle = '#9ca3af';
+        ctx.font = '10px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillText(labelPrice.toFixed(5), canvas.width - 5, y + 5);
+      }
+
+      const candleWidth = canvas.width / (candleData.length * 1.1); 
+      const maxPrice = Math.max(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
+      const minPrice = Math.min(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
+      const priceRange = maxPrice - minPrice || 1;
+      console.log(`Drawing ${candleData.length} candles. Range: ${minPrice.toFixed(5)} to ${maxPrice.toFixed(5)}`);
+
+      candleData.forEach((candle, i) => {
+        const x = i * candleWidth * 1.05; 
+        const openY = canvas.height - ((candle.open - minPrice) / priceRange) * (canvas.height - 40);
+        const closeY = canvas.height - ((candle.close - minPrice) / priceRange) * (canvas.height - 40);
+        const highY = canvas.height - ((candle.high - minPrice) / priceRange) * (canvas.height - 40);
+        const lowY = canvas.height - ((candle.low - minPrice) / priceRange) * (canvas.height - 40);
+
+        // Wick (high to low)
+        ctx.beginPath();
+        ctx.moveTo(x + candleWidth / 2, highY);
+        ctx.lineTo(x + candleWidth / 2, lowY);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = candle.close > candle.open ? '#22c55e' : '#ef4444';
+        ctx.stroke();
+
+        // Body
+        const bodyHeight = Math.abs(closeY - openY);
+        const bodyY = Math.min(openY, closeY);
+        ctx.fillStyle = candle.close > candle.open ? '#22c55e' : '#ef4444';
+        ctx.fillRect(x, bodyY, candleWidth * 0.8, bodyHeight);
       });
     }
 
-    function calculateRSI(data, window = 14) {
-      return data.map((_, i) => (i < window ? null : 70 - Math.random() * 20));
+    // Update candle data
+    function updateCandle() {
+      const change = (Math.random() - 0.5) * 0.0005;
+      const newClose = currentCandle.close + change;
+      const newCandle = {
+        open: currentCandle.close,
+        high: Math.max(currentCandle.close, newClose) + Math.random() * 0.0001,
+        low: Math.min(currentCandle.close, newClose) - Math.random() * 0.0001,
+        close: newClose
+      };
+      candleData.push(newCandle);
+      if (candleData.length > 20) candleData.shift();
+      currentCandle = newCandle;
+
+      document.getElementById('openPrice').textContent = currentCandle.open.toFixed(5);
+      document.getElementById('highPrice').textContent = currentCandle.high.toFixed(5);
+      document.getElementById('lowPrice').textContent = currentCandle.low.toFixed(5);
+      document.getElementById('closePrice').textContent = currentCandle.close.toFixed(5);
+
+      candleCount++;
+      drawChart();
     }
 
-    // Signal Component
-    function Signal({ signal }) {
-      const signalType = signal.signal === 1 ? 'Buy' : 'Sell';
-      const bgColor = signal.signal === 1 ? 'bg-green-500' : 'bg-red-500';
-      return (
-        <div className={`p-4 rounded-lg ${bgColor} text-white shadow-md`}>
-          <h3 className="text-lg font-bold">{signalType} Signal</h3>
-          <p>Time: {new Date(signal.timestamp).toLocaleString()}</p>
-          <p>Limit Price: {signal.limit_price.toFixed(5)}</p>
-          <p>Stop Loss: {signal.stop_loss.toFixed(5)}</p>
-          <p>Take Profit: {signal.take_profit.toFixed(5)}</p>
-          <p>Confidence: {(signal.confidence * 100).toFixed(2)}%</p>
-        </div>
-      );
+    // Generate signal after threshold
+    function generateSignal() {
+      if (candleCount >= signalThreshold) {
+        const latestCandle = candleData[candleData.length - 1];
+        const change = latestCandle.close - latestCandle.open;
+        const signal = change > 0 ? 'Buy' : 'Sell';
+        const signalBox = document.getElementById('signalBox');
+        signalBox.className = `bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700 ${signal === 'Buy' ? 'bg-green-900' : 'bg-red-900'} text-white`;
+        document.getElementById('signalText').innerHTML = `
+          ${signal} Signal<br>
+          Time: ${new Date().toLocaleString()}<br>
+          Price: ${latestCandle.close.toFixed(5)}<br>
+          Confidence: ${(Math.abs(change) * 100000).toFixed(2)}%
+        `;
+        candleCount = 0;
+      } else {
+        document.getElementById('signalText').textContent = `Waiting for signal... (${signalThreshold - candleCount} candles left)`;
+      }
     }
 
-    // Metrics Component
-    function Metrics({ metrics }) {
-      return (
-        <div className="grid grid-cols-2 gap-4 p-4 bg-gray-100 rounded-lg shadow-md">
-          <div>
-            <p className="font-semibold">Accuracy:</p>
-            <p>{(metrics.accuracy * 100).toFixed(2)}%</p>
-          </div>
-          <div>
-            <p className="font-semibold">Precision:</p>
-            <p>{(metrics.precision * 100).toFixed(2)}%</p>
-          </div>
-          <div>
-            <p className="font-semibold">Recall:</p>
-            <p>{(metrics.recall * 100).toFixed(2)}%</p>
-          </div>
-          <div>
-            <p className="font-semibold">F1 Score:</p>
-            <p>{(metrics.f1 * 100).toFixed(2)}%</p>
-          </div>
-        </div>
-      );
-    }
+    // Handle pair switch
+    document.getElementById('pairSelect').addEventListener('change', (e) => {
+      currentPair = e.target.value;
+      console.log(`Switched to ${currentPair}`);
+      currentCandle = currentPair === 'XAUUSD' ? { open: 2000, high: 2000, low: 2000, close: 2000 } : { open: 1.25, high: 1.25, low: 1.25, close: 1.25 };
+      candleData = [currentCandle];
+      candleCount = 0;
+      drawChart();
+    });
 
-    // Chart Component (Simplified to avoid canvas issues)
-    function Chart({ data }) {
-      const canvasRef = React.useRef(null);
-
-      React.useEffect(() => {
-        try {
-          const canvas = canvasRef.current;
-          if (!canvas) {
-            console.error("Canvas element not found");
-            return;
-          }
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            console.error("Canvas context not available");
-            return;
-          }
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-          ctx.beginPath();
-          const prices = data.map(d => d['4. close']).filter(p => p !== null);
-          if (prices.length === 0) {
-            console.warn("No valid price data for chart");
-            return;
-          }
-          const minPrice = Math.min(...prices);
-          const maxPrice = Math.max(...prices);
-          const priceRange = maxPrice - minPrice || 1; // Avoid division by zero
-          const width = canvas.width;
-          const height = canvas.height;
-
-          data.forEach((point, i) => {
-            const x = (i / (data.length - 1)) * width;
-            const y = height - ((point['4. close'] - minPrice) / priceRange) * (height - 20);
-            if (i === 0) {
-              ctx.moveTo(x, y);
-            } else {
-              ctx.lineTo(x, y);
-            }
-          });
-          ctx.strokeStyle = '#3b82f6';
-          ctx.lineWidth = 2;
-          ctx.stroke();
-        } catch (error) {
-          console.error("Error rendering chart:", error);
-        }
-      }, [data]);
-
-      return <canvas ref={canvasRef} width="600" height="200" className="w-full"></canvas>;
-    }
-
-    // Main Dashboard Component
-    function Dashboard() {
-      const [data] = React.useState(mockData);
-      const [signals] = React.useState(mockSignals);
-      const [metrics] = React.useState(performanceMetrics);
-
-      const latestSignal = signals[signals.length - 1];
-
-      console.log("Rendering Dashboard with data:", { dataLength: data.length, signalsLength: signals.length });
-
-      return (
-        <div className="min-h-screen bg-gray-50 p-6">
-          <h1 className="text-3xl font-bold text-center mb-6">Trading Automation Dashboard (GBPUSD)</h1>
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">Latest Trading Signal</h2>
-              <Signal signal={latestSignal} />
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">Price Chart</h2>
-              <Chart data={data} />
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">Model Performance</h2>
-              <Metrics metrics={metrics} />
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Render with error handling
-    try {
-      console.log("Attempting to render React app...");
-      const root = ReactDOM.createRoot(document.getElementById('root'));
-      root.render(<Dashboard />);
-      console.log("React app rendered successfully");
-    } catch (error) {
-      console.error("Failed to render React app:", error);
-      document.getElementById('error').classList.remove('hidden');
-    }
+    // Initialize and start updates
+    candleData = [currentCandle];
+    drawChart();
+    setInterval(updateCandle, 2000); 
+    setInterval(generateSignal, 10000);
   </script>
 </body>
 </html>

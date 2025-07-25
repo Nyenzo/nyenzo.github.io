@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Trading Automation Dashboard</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="assets/css/styles2.css">
 </head>
 <body class="bg-gray-900 text-white">
   <!-- Header -->
@@ -55,10 +55,10 @@
       <div class="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
         <h2 class="text-xl font-semibold mb-4">Model Performance</h2>
         <div class="grid grid-cols-2 gap-4">
-          <div><p class="font-medium">Accuracy:</p><p id="accuracy">72.00%</p></div>
-          <div><p class="font-medium">Precision:</p><p id="precision">75.00%</p></div>
-          <div><p class="font-medium">Recall:</p><p id="recall">70.00%</p></div>
-          <div><p class="font-medium">F1 Score:</p><p id="f1">73.00%</p></div>
+          <div><p class="font-medium">Accuracy:</p><p id="accuracy">67.00%</p></div>
+          <div><p class="font-medium">Precision:</p><p id="precision">65.00%</p></div>
+          <div><p class="font-medium">Recall:</p><p id="recall">61.00%</p></div>
+          <div><p class="font-medium">F1 Score:</p><p id="f1">63.00%</p></div>
         </div>
       </div>
     </main>
@@ -68,10 +68,12 @@
     // Initial data and state
     let currentPair = 'GBPUSD';
     let candleData = [];
-    let currentCandle = { open: 1.25, high: 1.25, low: 1.25, close: 1.25 };
+    let currentCandle = { open: 1.34, high: 1.34, low: 1.34, close: 1.34 };
     let candleCount = 0;
-    const signalThreshold = 5; 
-    const performanceMetrics = { accuracy: 0.67, precision: 0.65, recall: 0.70, f1: 0.63 };
+    const signalThreshold = 5;
+    const performanceMetrics = { accuracy: 0.72, precision: 0.75, recall: 0.70, f1: 0.73 };
+    const MARGIN_RIGHT = 30; 
+    const MAX_CANDLES = 50; 
 
     // Initialize chart
     const canvas = document.getElementById('priceChart');
@@ -92,10 +94,9 @@
         const y = i * (canvas.height / 5);
         ctx.beginPath();
         ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
+        ctx.lineTo(canvas.width - MARGIN_RIGHT, y); 
         ctx.stroke();
 
-        // Y-axis price labels
         const maxPrice = Math.max(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
         const minPrice = Math.min(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
         const priceRange = maxPrice - minPrice || 1;
@@ -106,32 +107,34 @@
         ctx.fillText(labelPrice.toFixed(5), canvas.width - 5, y + 5);
       }
 
-      const candleWidth = canvas.width / (candleData.length * 1.1); 
+      const usableWidth = canvas.width - MARGIN_RIGHT;
+      const candleWidth = usableWidth / MAX_CANDLES; 
       const maxPrice = Math.max(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
       const minPrice = Math.min(...candleData.flatMap(c => [c.high, c.open, c.close, c.low]));
       const priceRange = maxPrice - minPrice || 1;
       console.log(`Drawing ${candleData.length} candles. Range: ${minPrice.toFixed(5)} to ${maxPrice.toFixed(5)}`);
 
       candleData.forEach((candle, i) => {
-        const x = i * candleWidth * 1.05; 
+        const x = i * candleWidth; // Scale across full width
         const openY = canvas.height - ((candle.open - minPrice) / priceRange) * (canvas.height - 40);
         const closeY = canvas.height - ((candle.close - minPrice) / priceRange) * (canvas.height - 40);
         const highY = canvas.height - ((candle.high - minPrice) / priceRange) * (canvas.height - 40);
         const lowY = canvas.height - ((candle.low - minPrice) / priceRange) * (canvas.height - 40);
 
-        // Wick (high to low)
+        // Wick (small and constant)
         ctx.beginPath();
         ctx.moveTo(x + candleWidth / 2, highY);
         ctx.lineTo(x + candleWidth / 2, lowY);
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 0.5;
         ctx.strokeStyle = candle.close > candle.open ? '#22c55e' : '#ef4444';
         ctx.stroke();
 
-        // Body
+        // Body (small and constant, using most of candleWidth)
         const bodyHeight = Math.abs(closeY - openY);
         const bodyY = Math.min(openY, closeY);
         ctx.fillStyle = candle.close > candle.open ? '#22c55e' : '#ef4444';
-        ctx.fillRect(x, bodyY, candleWidth * 0.8, bodyHeight);
+        const fixedBodyWidth = candleWidth * 0.9; 
+        ctx.fillRect(x + (candleWidth - fixedBodyWidth) / 2, bodyY, fixedBodyWidth, bodyHeight);
       });
     }
 
@@ -146,7 +149,7 @@
         close: newClose
       };
       candleData.push(newCandle);
-      if (candleData.length > 20) candleData.shift();
+      if (candleData.length > MAX_CANDLES) candleData.shift();
       currentCandle = newCandle;
 
       document.getElementById('openPrice').textContent = currentCandle.open.toFixed(5);
@@ -182,7 +185,9 @@
     document.getElementById('pairSelect').addEventListener('change', (e) => {
       currentPair = e.target.value;
       console.log(`Switched to ${currentPair}`);
-      currentCandle = currentPair === 'XAUUSD' ? { open: 2000, high: 2000, low: 2000, close: 2000 } : { open: 1.25, high: 1.25, low: 1.25, close: 1.25 };
+      currentCandle = currentPair === 'XAUUSD' ? { open: 3341, high: 3341, low: 3341, close: 3341 } : 
+                       currentPair === 'EURUSD' ? { open: 1.172, high: 1.172, low: 1.172, close: 1.172 } : 
+                       { open: 1.34, high: 1.34, low: 1.34, close: 1.34 };
       candleData = [currentCandle];
       candleCount = 0;
       drawChart();
@@ -191,7 +196,7 @@
     // Initialize and start updates
     candleData = [currentCandle];
     drawChart();
-    setInterval(updateCandle, 2000); 
+    setInterval(updateCandle, 2000);
     setInterval(generateSignal, 10000);
   </script>
 </body>
